@@ -5838,11 +5838,82 @@
         name: sp.name, img: sp.img, happy: happy, hungry: hungry,
         sad: sp.sad, sleepy: sp.sleepy,   // ★ 추가: 있으면 (없어도 괜찮아요)
         hunger: 100, x: 150 + i * 220, y: 0,
-        level: 1, exp: 0, lines: lines
+        level: 1, exp: 0, lines: lines,
+        sampleName: sp.name,         // ★ 추가: 어느 샘플 대사 목록을 따라가는지
+        sampleSeen: lines.slice()    // ★ 추가: 이미 받은 샘플 대사
       };
     }
     localStorage.setItem('samplePetsAdded', 'yes');
     savePets();
+  }
+
+  // =========================================================
+  // ★ 추가: 새 버전에서 추가된 샘플 대사만 기존 펫에게 넣어주기
+  //   펫마다 sampleSeen(이미 받은 샘플 대사 목록)을 기억해둬요.
+  //   - sample-data.js 에 있는데 sampleSeen 에 없는 대사 = 새로 추가된 대사 → 넣어주기
+  //   - 사용자가 지운 대사는 sampleSeen 에 있으니까 다시 안 넣어요
+  //   - 사용자가 직접 추가한 대사는 건드리지 않아요
+  // =========================================================
+
+  // 이 펫이 따라가는 샘플 대사 목록 (없으면 null)
+  function sampleListFor(p) {
+    if (p.sampleName === undefined) {
+      // 예전에 만든 펫: 지금 이름으로 샘플 펫(Ay, Eve…)을 찾아서 정해두기
+      p.sampleName = '';
+      if (typeof SAMPLE_PETS !== 'undefined') {
+        for (var k = 0; k < SAMPLE_PETS.length; k++) {
+          if (SAMPLE_PETS[k].name === p.name && SAMPLE_PETS[k].lines !== undefined) {
+            p.sampleName = SAMPLE_PETS[k].name;
+          }
+        }
+      }
+    }
+    if (p.sampleName !== '' && typeof SAMPLE_PETS !== 'undefined') {
+      for (var j = 0; j < SAMPLE_PETS.length; j++) {
+        if (SAMPLE_PETS[j].name === p.sampleName && SAMPLE_PETS[j].lines !== undefined) {
+          return SAMPLE_PETS[j].lines;
+        }
+      }
+    }
+    if (typeof SAMPLE_PET_LINES !== 'undefined') {
+      return SAMPLE_PET_LINES;   // 직접 등록한 펫은 공통 샘플 대사
+    }
+    return null;
+  }
+
+  // 펫마다 새 샘플 대사 넣기. 새 대사를 받은 펫 번호들을 돌려줘요
+  function updateSampleLines() {
+    var learned = [];
+    for (var i = 0; i < pets.length; i++) {
+      var p = pets[i];
+      var list = sampleListFor(p);
+      if (list === null) {
+        continue;
+      }
+      if (p.sampleSeen === undefined) {
+        // 이 기능이 생기기 전 펫: 뭘 지웠는지 모르니까 지금 목록은 다 "받은 걸로" 치기
+        // (그래서 지금은 아무것도 안 바뀌고, 다음 버전에서 추가된 대사부터 들어가요)
+        p.sampleSeen = list.slice();
+        continue;
+      }
+      var added = 0;
+      for (var k = 0; k < list.length; k++) {
+        var line = String(list[k]).trim();
+        if (line === '' || p.sampleSeen.indexOf(line) !== -1) {
+          continue;   // 이미 받은 대사 (사용자가 지웠어도 다시 안 넣기)
+        }
+        p.sampleSeen[p.sampleSeen.length] = line;
+        if (p.lines.indexOf(line) === -1) {
+          p.lines[p.lines.length] = line;
+          added = added + 1;
+        }
+      }
+      if (added > 0) {
+        learned[learned.length] = i;
+      }
+    }
+    savePets();
+    return learned;
   }
 
   // ★ 수정: DB에서 읽어온 펫 넣기 (맨 아래 "처음 열었을 때"에서 불러요)
@@ -6379,7 +6450,7 @@
     }
     var p = pets[i];
     if (p.hunger >= 100) {
-      say(i, '배불러서 더 못 먹어요! 😵');
+      say(i, sampleLine(i, 'fullLine', '배불러서 더 못 먹어요! 😵'));   // ★ 수정: 펫마다 배부를 때 대사
       return false;
     }
     p.hunger = p.hunger + amount;
@@ -6707,7 +6778,9 @@
             y: 0,             // ★ 수정: 바닥에서 등장
             level: 1,         // ★ 추가
             exp: 0,           // ★ 추가
-            lines: defaultLines()   // ★ 추가
+            lines: defaultLines(),   // ★ 추가
+            sampleName: '',               // ★ 추가: 직접 등록한 펫은 공통 샘플 대사를 따라가요
+            sampleSeen: defaultLines()    // ★ 추가: 이미 받은 샘플 대사
           };
           savePets();
           createPetElements();
@@ -6953,6 +7026,16 @@
       pets[i].lines = [];
     }
     var added = addLinesToPet(i, list);
+    // ★ 추가: 이 목록은 다 받은 걸로 기억 (다음 버전에서 또 넣지 않게)
+    if (pets[i].sampleSeen === undefined) {
+      pets[i].sampleSeen = [];
+    }
+    for (var s = 0; s < list.length; s++) {
+      if (pets[i].sampleSeen.indexOf(list[s]) === -1) {
+        pets[i].sampleSeen[pets[i].sampleSeen.length] = list[s];
+      }
+    }
+    savePets();
     alert(whose + ' 샘플 대사 ' + added + '개 넣었어요! (겹치는 대사는 빼고)');
   }
 
@@ -7787,9 +7870,14 @@
       bgPhoto = saved.bgImage;   // ★ 추가: 배경 사진
       applyBgPhoto();
     }
+    var learned = updateSampleLines();   // ★ 추가: 새 버전의 새 대사 넣기
     showDiaryList();
     showCalendar();
     createPetElements();
+    // ★ 추가: 새 대사를 받은 펫이 한마디
+    for (var li = 0; li < learned.length; li++) {
+      say(learned[li], '새로운 말을 배웠어요! ✨');
+    }
   });
 
 
