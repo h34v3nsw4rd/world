@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">   <!-- ★ 추가: 휴대폰에서 화면 크기에 맞추기 -->
 <title>HeavensNote</title>   <!-- ★ 수정 -->
 <!-- ★ 추가: 파비콘 (index.html 옆의 favicon 폴더 안 파일들. 깃허브 주소가 /Heavensward/ 라서 앞에 / 없이 써요) -->
 <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
@@ -1662,6 +1663,175 @@
     resize: vertical;
   }
 
+  /* =========================================================
+     ★ 추가: 휴대폰 화면 (폭 820px 이하)
+     일기만 크게 보이고, 디데이·할 일·달력·플레이리스트는 ☰ 메뉴에서,
+     작업대·뉴스의 레이어 창은 🗂 레이어 버튼으로 열어요
+     ========================================================= */
+  #menuBtn,
+  #layerBtn,
+  .drawerTop,
+  #drawerShade {
+    display: none;
+  }
+  @media (min-width: 821px) {
+    #layerBtn {
+      display: none !important;   /* PC에선 레이어 창이 원래 자리에 보이니까 버튼 숨김 */
+    }
+  }
+  @media (max-width: 820px) {
+    #header {
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    #header h1 {
+      font-size: 22px;
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #menuBtn {
+      display: inline-block;
+      font-size: 18px;
+      padding: 4px 11px;
+    }
+    #layerBtn {
+      display: inline-block;   /* 레이어 창이 없을 땐 JS가 숨겨요 */
+    }
+    #headerBtns {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;          /* 버튼이 많으면 옆으로 밀어서 보기 */
+      width: 100%;
+      gap: 4px;
+      padding-bottom: 2px;
+    }
+    #headerBtns button,
+    #headerBtns select {
+      flex-shrink: 0;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+    #page {
+      display: block;
+      padding: 10px;
+    }
+    #right {
+      width: 100%;
+    }
+
+    /* 왼쪽 메뉴: 화면 밖에 숨어 있다가 ☰ 누르면 스르륵 */
+    #left {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: min(340px, 88vw);
+      padding: 12px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      background: var(--page-bg);
+      z-index: 95;
+      transform: translateX(-105%);
+      transition: transform 0.25s;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+      gap: 14px;
+    }
+    body.leftOpen #left {
+      transform: none;
+    }
+    .drawerTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 오른쪽 레이어 창: 🗂 레이어 누르면 오른쪽에서 스르륵 */
+    #layerPanel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(270px, 85vw);
+      max-height: none;
+      z-index: 95;
+      border-radius: 14px 0 0 14px;
+      transform: translateX(105%);
+      transition: transform 0.25s;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    }
+    body.layerOpen #layerPanel {
+      transform: none;
+    }
+
+    body.leftOpen #drawerShade,
+    body.layerOpen #drawerShade {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 94;
+    }
+
+    /* 일기 위쪽 줄, 툴바는 줄바꿈 */
+    .writeTop {
+      flex-wrap: wrap;
+    }
+    #diaryTitleInput {
+      min-width: 0;
+      flex: 1 1 140px;
+    }
+
+    /* 창들: 화면 폭에 맞추기 */
+    #settingModal,
+    #petModal,
+    #noticeModal {
+      width: auto;
+      max-width: calc(100% - 20px);
+      margin: 20px auto;
+      box-sizing: border-box;
+    }
+    #monthModal {
+      width: calc(100vw - 12px);
+      height: 94vh;
+      margin: 2vh auto 0;
+      padding: 12px;
+    }
+    #stickerPanel {
+      max-width: calc(100vw - 16px);
+      box-sizing: border-box;
+    }
+    .pet {
+      touch-action: none;   /* 펫 잡고 있을 땐 화면 확대·스크롤 안 되게 */
+    }
+  }
+
+  /* ★ 추가: 손가락으로 쓰는 기기(휴대폰·태블릿)에선 손잡이를 크게 */
+  @media (pointer: coarse) {
+    .handle {
+      transform: scale(1.7);
+    }
+    .rotHandle {
+      top: -54px;   /* 커진 만큼 위로 (가는 테이프 가운데를 잡아도 돌리기 손잡이가 안 잡히게) */
+    }
+    .sticker,
+    .item img {
+      -webkit-touch-callout: none;   /* 오래 누르면 뜨는 "이미지 저장" 메뉴 막기 */
+      -webkit-user-select: none;
+    }
+  }
+
+  /* ★ 추가: 노트 고르는 칸 */
+  #noteSelect {
+    max-width: 180px;
+    margin-right: 4px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
   /* ★ 추가: 배경 사진 + 상자 투명도 */
   #bgPhoto {
     display: none;
@@ -1786,9 +1956,11 @@
 <div id="captureArea">
 
 <div id="header">
+  <button id="menuBtn" class="hideOnCapture" onclick="toggleLeftPanel()" title="디데이 · 할 일 · 달력 · 플레이리스트">☰</button>   <!-- ★ 추가: 휴대폰용 메뉴 -->
   <h1 id="siteTitle">HeavensNote</h1>   <!-- ★ 수정: 처음 이름 -->
   <!-- ★ 수정: 이미지 저장할 땐 버튼들 숨기기 -->
   <div id="headerBtns" class="hideOnCapture">
+    <select id="noteSelect" title="노트 고르기"></select>   <!-- ★ 추가: 노트 여러 권 -->
     <span id="syncBadge" class="syncBadge"></span>   <!-- ★ 추가: 구글 시트 동기화 상태 -->
     <button id="noticeBtn" style="display:none;">📢 공지<span id="noticeDot"></span></button>   <!-- ★ 추가: 공지사항 다시 보기 -->
     <button id="darkBtn">🌙 다크</button>
@@ -1802,6 +1974,11 @@
 
 <div id="page">
   <div id="left">
+      <!-- ★ 추가: 휴대폰에서만 보이는 닫기 줄 -->
+      <div class="drawerTop hideOnCapture">
+        <b>📋 메뉴</b>
+        <button onclick="closeDrawers()">✕ 닫기</button>
+      </div>
     <div class="box" id="ddayBox">
       <h2>디데이</h2>
       <div class="ddayInputRow hideOnCapture">   <!-- ★ 수정: 이미지 저장할 땐 숨김 -->
@@ -1876,6 +2053,7 @@
           <button id="backToListBtn" class="hideOnCapture">← 목록</button>
           <input type="text" id="diaryTitleInput" placeholder="제목">
           <button id="deleteDiaryBtn" class="hideOnCapture">🗑 삭제</button>
+          <button id="layerBtn" class="hideOnCapture" onclick="toggleLayerPanel()" style="display:none;">🗂 레이어</button>   <!-- ★ 추가: 휴대폰용 레이어 창 버튼 -->
         </div>
 
         <!-- ★ 추가: 오늘의 노래 -->
@@ -2032,6 +2210,9 @@
 
 </div>   <!-- ★ 추가: captureArea 끝 -->
 
+<!-- ★ 추가: 휴대폰에서 메뉴/레이어 창 열렸을 때 뒤 어둡게 (누르면 닫혀요) -->
+<div id="drawerShade" onclick="closeDrawers()"></div>
+
 <!-- ★ 추가: 공지사항(패치노트) 창 (처음엔 숨김) -->
 <div id="noticeModalBg" style="display:none;">
   <div id="noticeModal">
@@ -2045,6 +2226,18 @@
 <div id="settingModalBg" style="display:none;">
   <div id="settingModal">
     <h2>⚙ 설정</h2>
+
+    <!-- ★ 추가: 노트 관리 -->
+    <h3>📚 노트</h3>
+    <div class="setRow">
+      <span class="setLabel">지금 노트 이름</span>
+      <input type="text" id="noteNameInput" maxlength="20">
+    </div>
+    <div class="setRow">
+      <button onclick="createNote()">＋ 새 노트 만들기</button>
+      <button id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑 이 노트 지우기</button>
+    </div>
+    <p class="empty">노트마다 일기 · 달력 스티커 · 펫 · 플레이리스트 · 꾸미기(이름, 테마, 배경, 글꼴, 투명도)가 따로예요. 할 일 · 디데이 · 내 스티커는 모든 노트가 같이 써요.</p>
 
     <h3>사이트 이름</h3>
     <div class="setRow">
@@ -2214,6 +2407,8 @@
   <div id="petModal">
     <h2>🐾 내 펫 (최대 4마리)</h2>
     <div id="petCards"></div>
+    <!-- ★ 추가: 기본 펫(sample-data.js)이 없어졌을 때 다시 데려오기 -->
+    <button id="sampleBackBtn" onclick="bringBackSamplePets()" style="display:none;">🐾 기본 펫 다시 데려오기</button>
 
     <!-- ★ 추가: 바닥에 떨어지는 음식 -->
     <h3>🍙 바닥에 떨어지는 음식</h3>
@@ -2299,6 +2494,63 @@
   //   IndexedDB는 "나중에 결과를 알려주는" 방식이라, 페이지를 열면
   //   ① 화면을 먼저 그리고 → ② DB에서 다 읽어오면 → ③ 일기·펫을 다시 그려요.
   // =========================================================
+  // =========================================================
+  // ★ 추가: 노트 여러 권 (굿노트처럼 일기장 나누기)
+  //   노트마다 따로: 일기, 달력 스티커, 펫, 스타일(사이트 이름·테마·다크·배경·사진·글꼴·투명도)
+  //   ★ 수정: 플레이리스트도 노트마다 따로
+  //   모든 노트 같이: 할 일, 디데이, 내 스티커, 구글 시트 동기화, 내 글꼴, 음량
+  //
+  //   저장할 때 이름표 앞에 노트 번호를 붙여요.  예) 노트2의 일기 → 'n2:diaryList'
+  //   노트1(n1)은 예전 이름표 그대로라서, 지금까지 쓴 건 전부 노트1이 돼요.
+  // =========================================================
+  var NOTE_KEYS = ['siteTitle', 'theme', 'darkMode', 'bgColors', 'siteFont', 'boxAlpha', 'bgBlur', 'samplePetsAdded', 'playlistUrl'];   // 작은 것 (localStorage)   ★ 수정: 플레이리스트도 노트마다
+  var NOTE_BIG_KEYS = ['diaryList', 'pets', 'monthStickers', 'bgImage'];   // 큰 것 (DB)
+
+  var noteList = [{ id: 'n1', name: '노트1' }];
+  try {
+    var savedNoteList = JSON.parse(localStorage.getItem('noteList'));
+    if (Array.isArray(savedNoteList) && savedNoteList.length > 0) {
+      noteList = savedNoteList;
+    }
+  } catch (e) {
+    // 망가져 있으면 노트1만
+  }
+  var currentNote = localStorage.getItem('currentNote');
+  if (noteIndex(currentNote) === -1) {
+    currentNote = 'n1';   // 없는 노트면 노트1로
+  }
+
+  // 노트 번호로 noteList 에서 몇 번째인지 (없으면 -1)
+  function noteIndex(id) {
+    for (var i = 0; i < noteList.length; i++) {
+      if (noteList[i].id === id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // 이름표에 노트 번호 붙이기 (노트1은 그대로)
+  function noteKeyOf(id, key) {
+    if (id === 'n1') {
+      return key;
+    }
+    return id + ':' + key;
+  }
+
+  // 지금 보고 있는 노트의 이름표
+  function nk(key) {
+    return noteKeyOf(currentNote, key);
+  }
+
+  // DB 이름표: 노트마다 따로인 큰 데이터면 노트 번호 붙이기
+  function dbKey(key) {
+    if (NOTE_BIG_KEYS.indexOf(key) !== -1) {
+      return nk(key);
+    }
+    return key;
+  }
+
   var bigKeys = ['diaryList', 'pets', 'myStickers', 'monthStickers', 'bgImage'];   // ★ 수정: 배경 사진도   // ★ 수정: 달력 스티커도
   var dataDB = null;
   var dataLoaded = false;   // DB에서 다 읽기 전엔 저장하면 안 됨 (빈 내용으로 덮어쓰는 사고 방지)
@@ -2324,19 +2576,24 @@
   }
 
   // 바로 저장 (onDone: 저장 끝나면 실행할 함수, 없어도 됨)
+  var dbInflight = 0;   // ★ 추가: 아직 저장 중인 개수 (노트 바꾸기 전에 다 저장될 때까지 기다리려고)
+
   function dbPut(key, value, onDone) {
     if (dataLoaded === false) {
       return;
     }
+    dbInflight = dbInflight + 1;   // ★ 추가
     openDataDB(function (db) {
       var tx = db.transaction('data', 'readwrite');
-      tx.objectStore('data').put(value, key);
+      tx.objectStore('data').put(value, dbKey(key));   // ★ 수정: 노트마다 따로
       tx.oncomplete = function () {
+        dbInflight = dbInflight - 1;   // ★ 추가
         if (onDone !== undefined) {
           onDone();
         }
       };
       tx.onabort = function () {
+        dbInflight = dbInflight - 1;   // ★ 추가
         alert('저장하지 못했어요! 컴퓨터 저장 공간이 부족한지 확인해주세요.');
       };
     });
@@ -2369,7 +2626,7 @@
 
   // 하나 읽어서 result 에 담기 (for문 안에서 key를 고정하려고 함수로 따로)
   function dbGetInto(store, key, result) {
-    var req = store.get(key);
+    var req = store.get(dbKey(key));   // ★ 수정: 노트마다 따로
     req.onsuccess = function () {
       result[key] = req.result;
     };
@@ -2389,6 +2646,9 @@
         // DB엔 없고 localStorage에 있으면 → DB로 옮기고, 옮긴 다음 localStorage에선 지우기 (5MB 비우기)
         for (var k = 0; k < bigKeys.length; k++) {
           var key = bigKeys[k];
+          if (currentNote !== 'n1' && NOTE_BIG_KEYS.indexOf(key) !== -1) {
+            continue;   // ★ 추가: 예전 데이터 옮기기는 노트1만
+          }
           var old = localStorage.getItem(key);
           if (result[key] === undefined && old !== null) {
             result[key] = JSON.parse(old);
@@ -2440,7 +2700,7 @@
   // =========================================================
   var siteTitle = document.getElementById('siteTitle');
 
-  var savedSiteTitle = localStorage.getItem('siteTitle');
+  var savedSiteTitle = localStorage.getItem(nk('siteTitle'));   // ★ 수정: 노트마다 따로
   if (savedSiteTitle !== null) {
     siteTitle.textContent = savedSiteTitle;
     document.title = savedSiteTitle;
@@ -2472,7 +2732,7 @@
     }
     siteTitle.textContent = newTitle;
     document.title = newTitle;
-    localStorage.setItem('siteTitle', newTitle);
+    localStorage.setItem(nk('siteTitle'), newTitle);   // ★ 수정: 노트마다 따로
   });
 
 
@@ -2490,7 +2750,7 @@
 
   // ★ 수정: null 이면 "테마 기본 색"
   var bgColors = { light: null, dark: null };
-  var savedBgColors = localStorage.getItem('bgColors');
+  var savedBgColors = localStorage.getItem(nk('bgColors'));   // ★ 수정: 노트마다 따로
   if (savedBgColors !== null) {
     bgColors = JSON.parse(savedBgColors);
     // 예전 기본 색으로 저장돼 있던 건 "테마 기본 색"으로 바꾸기 (그래야 새 테마 색이 보여요)
@@ -2504,7 +2764,7 @@
   }
 
   var darkMode = false;
-  if (localStorage.getItem('darkMode') === 'on') {
+  if (localStorage.getItem(nk('darkMode')) === 'on') {   // ★ 수정: 노트마다 따로
     darkMode = true;
   }
 
@@ -2514,7 +2774,7 @@
     { name: '🌸 핑크', value: 'pink' }
   ];
   var theme = 'sky';
-  if (localStorage.getItem('theme') === 'pink') {
+  if (localStorage.getItem(nk('theme')) === 'pink') {   // ★ 수정: 노트마다 따로
     theme = 'pink';
   }
 
@@ -2560,7 +2820,7 @@
   // ★ 추가: 테마 바꾸기 (설정 창 버튼)
   function setTheme(t) {
     theme = t;
-    localStorage.setItem('theme', t);
+    localStorage.setItem(nk('theme'), t);   // ★ 수정: 노트마다 따로
     applyTheme();
     renderThemeBtns();
     syncColorInputs('light');
@@ -2581,10 +2841,10 @@
   darkBtn.addEventListener('click', function () {
     if (darkMode === true) {
       darkMode = false;
-      localStorage.setItem('darkMode', 'off');
+      localStorage.setItem(nk('darkMode'), 'off');   // ★ 수정: 노트마다 따로
     } else {
       darkMode = true;
-      localStorage.setItem('darkMode', 'on');
+      localStorage.setItem(nk('darkMode'), 'on');   // ★ 수정: 노트마다 따로
     }
     applyTheme();
   });
@@ -2611,7 +2871,7 @@
   // 배경색 바꾸기 (mode: 'light' 또는 'dark')
   function setBg(mode, color) {
     bgColors[mode] = color;
-    localStorage.setItem('bgColors', JSON.stringify(bgColors));
+    localStorage.setItem(nk('bgColors'), JSON.stringify(bgColors));   // ★ 수정: 노트마다 따로
     applyTheme();
     syncColorInputs(mode);
   }
@@ -2675,8 +2935,8 @@
   // ★ 추가: 상자 투명도 (UI 설정)
   // =========================================================
   var boxAlpha = 100;
-  if (localStorage.getItem('boxAlpha') !== null) {
-    boxAlpha = Number(localStorage.getItem('boxAlpha'));
+  if (localStorage.getItem(nk('boxAlpha')) !== null) {   // ★ 수정: 노트마다 따로
+    boxAlpha = Number(localStorage.getItem(nk('boxAlpha')));   // ★ 수정: 노트마다 따로
   }
   var boxAlphaInput = document.getElementById('boxAlphaInput');
 
@@ -2688,7 +2948,7 @@
 
   function setBoxAlpha(v) {
     boxAlpha = v;
-    localStorage.setItem('boxAlpha', String(v));
+    localStorage.setItem(nk('boxAlpha'), String(v));   // ★ 수정: 노트마다 따로
     applyBoxAlpha();
   }
 
@@ -2704,8 +2964,8 @@
   var bgPhoto = null;   // 사진 (dataURL 글자). 없으면 null
   var bgPhotoEl = document.getElementById('bgPhoto');
   var bgBlur = 0;
-  if (localStorage.getItem('bgBlur') !== null) {
-    bgBlur = Number(localStorage.getItem('bgBlur'));
+  if (localStorage.getItem(nk('bgBlur')) !== null) {   // ★ 수정: 노트마다 따로
+    bgBlur = Number(localStorage.getItem(nk('bgBlur')));   // ★ 수정: 노트마다 따로
   }
   var bgBlurInput = document.getElementById('bgBlurInput');
 
@@ -2747,7 +3007,7 @@
 
   bgBlurInput.addEventListener('input', function () {
     bgBlur = Number(bgBlurInput.value);
-    localStorage.setItem('bgBlur', String(bgBlur));
+    localStorage.setItem(nk('bgBlur'), String(bgBlur));   // ★ 수정: 노트마다 따로
     applyBgPhoto();
   });
   applyBgPhoto();
@@ -3544,8 +3804,8 @@
   // =========================================================
   var siteFontSelect = document.getElementById('siteFontSelect');
   var siteFont = '';
-  if (localStorage.getItem('siteFont') !== null) {
-    siteFont = localStorage.getItem('siteFont');
+  if (localStorage.getItem(nk('siteFont')) !== null) {   // ★ 수정: 노트마다 따로
+    siteFont = localStorage.getItem(nk('siteFont'));   // ★ 수정: 노트마다 따로
   } else if (typeof SAMPLE_SITE_FONT !== 'undefined') {
     siteFont = SAMPLE_SITE_FONT;
   }
@@ -3564,7 +3824,7 @@
 
   siteFontSelect.addEventListener('change', function () {
     siteFont = siteFontSelect.value;
-    localStorage.setItem('siteFont', siteFont);
+    localStorage.setItem(nk('siteFont'), siteFont);   // ★ 수정: 노트마다 따로
     applySiteFont();
   });
 
@@ -3912,19 +4172,19 @@
     del.title = '지우기';
     el.appendChild(del);
 
-    rot.addEventListener('mousedown', function (e) {
+    onPress(rot, function (e) {   // ★ 수정: 마우스 + 손가락
       e.preventDefault();
       e.stopPropagation();
       selectThing(kind, i);
       startDrag(e, 'rotate', kind, i);
     });
-    size.addEventListener('mousedown', function (e) {
+    onPress(size, function (e) {   // ★ 수정: 마우스 + 손가락
       e.preventDefault();
       e.stopPropagation();
       selectThing(kind, i);
       startDrag(e, 'size', kind, i);
     });
-    del.addEventListener('mousedown', function (e) {
+    onPress(del, function (e) {   // ★ 수정: 마우스 + 손가락
       e.preventDefault();
       e.stopPropagation();
       deleteThing(kind, i);
@@ -3936,13 +4196,49 @@
       move.textContent = '✥';
       move.title = '잡고 옮기기';
       el.appendChild(move);
-      move.addEventListener('mousedown', function (e) {
+      onPress(move, function (e) {   // ★ 수정: 마우스 + 손가락
         e.preventDefault();
         e.stopPropagation();
         selectThing(kind, i);
         startDrag(e, 'move', kind, i);
       });
     }
+  }
+
+  // =========================================================
+  // ★ 추가: 손가락(터치)으로도 옮기기 · 크기 · 돌리기
+  //   마우스용 코드를 그대로 쓰려고, 손가락 정보를 마우스 정보 모양으로 바꿔서 넘겨요
+  // =========================================================
+  function touchToEv(e) {
+    var t = e.touches[0];
+    if (t === undefined) {
+      t = e.changedTouches[0];
+    }
+    return {
+      clientX: t.clientX,
+      clientY: t.clientY,
+      altKey: false,
+      shiftKey: false,
+      target: e.target,
+      isTouch: true,
+      preventDefault: function () {
+        e.preventDefault();   // 이걸 부르면 화면 스크롤 대신 끌기
+      },
+      stopPropagation: function () {
+        e.stopPropagation();
+      }
+    };
+  }
+
+  // 누르기: 마우스 mousedown + 손가락 touchstart 둘 다 같은 함수로
+  function onPress(el, fn) {
+    el.addEventListener('mousedown', fn);
+    el.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) {
+        return;   // 두 손가락(확대 등)은 무시
+      }
+      fn(touchToEv(e));
+    }, { passive: false });
   }
 
   // ----- 끌기 (이동 / 크기 / 회전) -----
@@ -3959,14 +4255,29 @@
       cx: rect.left + rect.width / 2,    // 회전 중심
       cy: rect.top + rect.height / 2,
       moved: false,
-      shake: newShake()
+      shake: newShake(),
+      isTouch: e.isTouch === true   // ★ 추가: 손가락으로 시작했는지
     };
   }
 
   document.addEventListener('mousemove', function (e) {
-    if (drag === null) {
+    if (drag === null || drag.isTouch === true) {
       return;
     }
+    dragMove(e);
+  });
+
+  // ★ 추가: 손가락으로 끌기
+  document.addEventListener('touchmove', function (e) {
+    if (drag === null || drag.isTouch !== true) {
+      return;
+    }
+    e.preventDefault();   // 끄는 동안 화면 스크롤 막기
+    dragMove(touchToEv(e));
+  }, { passive: false });
+
+  // ★ 수정: 마우스·손가락 같이 쓰는 끌기 (원래 mousemove 안에 있던 내용)
+  function dragMove(e) {
     var t = getThing(drag.kind, drag.index);
     var dx = e.clientX - drag.startX;
     var dy = e.clientY - drag.startY;
@@ -4029,12 +4340,45 @@
       t.rot = ang;
     }
     placeThing(drag.kind, drag.index);
-  });
+  }
 
   document.addEventListener('mouseup', function () {
-    if (drag === null) {
+    if (drag === null || drag.isTouch === true) {
       return;
     }
+    dragEnd();
+  });
+
+  // ★ 추가: 손가락 떼기
+  var lastTap = { kind: '', index: -1, time: 0 };   // 두 번 톡톡 알아보기
+  document.addEventListener('touchend', function () {
+    if (drag === null || drag.isTouch !== true) {
+      return;
+    }
+    var kind = drag.kind;
+    var index = drag.index;
+    var wasMoved = drag.moved;
+    var mode = drag.mode;
+    dragEnd();
+    // 사진칸: 톡 누르면(빈 칸) 사진 고르기, 두 번 톡톡 누르면 사진 바꾸기 (마우스의 클릭·더블클릭 대신)
+    if (wasMoved === false && mode === 'move' && kind === 'item' && items[index] !== undefined && items[index].type === 'image') {
+      var now = Date.now();
+      if (items[index].src === '' || (lastTap.kind === kind && lastTap.index === index && now - lastTap.time < 400)) {
+        pickPhotoFor(index);
+        lastTap = { kind: '', index: -1, time: 0 };
+      } else {
+        lastTap = { kind: kind, index: index, time: now };
+      }
+    }
+  });
+  document.addEventListener('touchcancel', function () {
+    if (drag !== null && drag.isTouch === true) {
+      dragEnd();
+    }
+  });
+
+  // ★ 수정: 마우스·손가락 같이 쓰는 놓기 (원래 mouseup 안에 있던 내용)
+  function dragEnd() {
     var kind = drag.kind;
     lastDragMoved = drag.moved;
     drag = null;
@@ -4043,7 +4387,7 @@
       fitCanvas();
     }
     saveLayer(kind);
-  });
+  }
 
   // ----- 휘젓기 감지 (좌우 방향이 1.5초 안에 6번 이상 바뀌면 어지러움) -----
   function newShake() {
@@ -4638,7 +4982,7 @@
     addHandles(el, 'item', i, item.type === 'text');
 
     // 사진은 아무 데나 잡고 옮기기, 글상자는 테두리(여백)나 ✥로 옮기기 (안쪽은 글쓰기)
-    el.addEventListener('mousedown', function (e) {
+    onPress(el, function (e) {   // ★ 수정: 마우스 + 손가락
       if (e.target.classList.contains('handle')) {
         return;
       }
@@ -4914,6 +5258,8 @@
       itemSection.style.display = 'block';
       layerPanel.style.display = 'block';
     }
+    // ★ 추가: 휴대폰에선 레이어 창이 있을 때만 🗂 레이어 버튼 보이기
+    document.getElementById('layerBtn').style.display = layerPanel.style.display === 'block' ? '' : 'none';
   }
 
   // 레이어 줄 하나에 끌기 기능 달기 (같은 종류끼리만 순서 바꾸기)
@@ -5459,7 +5805,7 @@
     }
     addHandles(el, kind, i, false);
 
-    el.addEventListener('mousedown', function (e) {
+    onPress(el, function (e) {   // ★ 수정: 마우스 + 손가락
       if (e.target.classList.contains('handle')) {
         return;
       }
@@ -5817,7 +6163,7 @@
 
   // ★ 추가: sample-data.js 의 기본 펫 넣기 (처음 한 번만. 지운 펫이 다시 생기지 않게 표시해둬요)
   function addSamplePets() {
-    if (typeof SAMPLE_PETS === 'undefined' || localStorage.getItem('samplePetsAdded') !== null) {
+    if (typeof SAMPLE_PETS === 'undefined' || localStorage.getItem(nk('samplePetsAdded')) !== null) {   // ★ 수정: 노트마다 따로
       return;
     }
     for (var i = 0; i < SAMPLE_PETS.length && pets.length < 4; i++) {
@@ -5843,7 +6189,7 @@
         sampleSeen: lines.slice()    // ★ 추가: 이미 받은 샘플 대사
       };
     }
-    localStorage.setItem('samplePetsAdded', 'yes');
+    localStorage.setItem(nk('samplePetsAdded'), 'yes');   // ★ 수정: 노트마다 따로
     savePets();
   }
 
@@ -5856,29 +6202,51 @@
   // =========================================================
 
   // 이 펫이 따라가는 샘플 대사 목록 (없으면 null)
-  function sampleListFor(p) {
-    if (p.sampleName === undefined) {
-      // 예전에 만든 펫: 지금 이름으로 샘플 펫(Ay, Eve…)을 찾아서 정해두기
-      p.sampleName = '';
-      if (typeof SAMPLE_PETS !== 'undefined') {
-        for (var k = 0; k < SAMPLE_PETS.length; k++) {
-          if (SAMPLE_PETS[k].name === p.name && SAMPLE_PETS[k].lines !== undefined) {
-            p.sampleName = SAMPLE_PETS[k].name;
-          }
+  // ★ 추가: 이 펫이 sample-data.js 의 어느 기본 펫인지 찾기 (없으면 null)
+  //   sample-data.js 에서 이름을 바꿔도(Ay → Aymeric) 같은 펫으로 알아보게
+  //   ① 기억해둔 샘플 이름 → ② 지금 이름 → ③ 기본 그림 파일 순서로 찾아요
+  function samplePetFor(p) {
+    if (typeof SAMPLE_PETS === 'undefined') {
+      return null;
+    }
+    var k;
+    if (p.sampleName !== undefined && p.sampleName !== '') {
+      for (k = 0; k < SAMPLE_PETS.length; k++) {
+        if (SAMPLE_PETS[k].name === p.sampleName) {
+          return SAMPLE_PETS[k];
         }
       }
     }
-    if (p.sampleName !== '' && typeof SAMPLE_PETS !== 'undefined') {
-      for (var j = 0; j < SAMPLE_PETS.length; j++) {
-        if (SAMPLE_PETS[j].name === p.sampleName && SAMPLE_PETS[j].lines !== undefined) {
-          return SAMPLE_PETS[j].lines;
-        }
+    for (k = 0; k < SAMPLE_PETS.length; k++) {
+      if (SAMPLE_PETS[k].name === p.name) {
+        return SAMPLE_PETS[k];
       }
     }
-    if (typeof SAMPLE_PET_LINES !== 'undefined') {
-      return SAMPLE_PET_LINES;   // 직접 등록한 펫은 공통 샘플 대사
+    for (k = 0; k < SAMPLE_PETS.length; k++) {
+      if (SAMPLE_PETS[k].img === p.img) {
+        return SAMPLE_PETS[k];
+      }
     }
     return null;
+  }
+
+  // ★ 수정: 이 펫이 따라가는 샘플 대사 목록 (없으면 null)
+  function sampleListFor(p) {
+    var sp = samplePetFor(p);
+    if (sp !== null) {
+      p.sampleName = sp.name;   // 샘플 이름이 바뀌었으면 새 이름으로 기억
+      if (sp.lines !== undefined) {
+        return sp.lines;
+      }
+      return null;
+    }
+    if (p.sampleName === undefined) {
+      p.sampleName = '';   // 기본 펫이 아닌 예전 펫 = 직접 등록한 펫
+    }
+    if (p.sampleName === '' && typeof SAMPLE_PET_LINES !== 'undefined') {
+      return SAMPLE_PET_LINES;   // 직접 등록한 펫은 공통 샘플 대사
+    }
+    return null;   // 기본 펫이었는데 sample-data.js 에서 빠졌으면 아무것도 안 넣기
   }
 
   // 펫마다 새 샘플 대사 넣기. 새 대사를 받은 펫 번호들을 돌려줘요
@@ -5914,6 +6282,58 @@
     }
     savePets();
     return learned;
+  }
+
+  // ★ 추가: 지금 없는 기본 펫 목록 (이름표 sampleName 이나 이름으로 확인)
+  function missingSamplePets() {
+    var missing = [];
+    if (typeof SAMPLE_PETS === 'undefined') {
+      return missing;
+    }
+    for (var k = 0; k < SAMPLE_PETS.length; k++) {
+      var found = false;
+      for (var i = 0; i < pets.length; i++) {
+        if (samplePetFor(pets[i]) === SAMPLE_PETS[k]) {   // ★ 수정: 이름이 바뀌어도 같은 펫으로
+          found = true;
+        }
+      }
+      if (found === false) {
+        missing[missing.length] = SAMPLE_PETS[k];
+      }
+    }
+    return missing;
+  }
+
+  // ★ 추가: 펫 창의 "기본 펫 다시 데려오기" (없는 기본 펫만 레벨 1로, 4마리까지)
+  function bringBackSamplePets() {
+    var missing = missingSamplePets();
+    var added = 0;
+    for (var k = 0; k < missing.length && pets.length < 4; k++) {
+      var sp = missing[k];
+      var lines = defaultLines();
+      if (sp.lines !== undefined && sp.lines.length > 0) {
+        lines = sp.lines.slice();
+      }
+      pets[pets.length] = {
+        name: sp.name, img: sp.img,
+        happy: sp.happy !== undefined ? sp.happy : sp.img,
+        hungry: sp.hungry !== undefined ? sp.hungry : sp.img,
+        sad: sp.sad, sleepy: sp.sleepy,
+        hunger: 100, x: 150 + pets.length * 220, y: 0,
+        level: 1, exp: 0, lines: lines,
+        sampleName: sp.name, sampleSeen: lines.slice()
+      };
+      added = added + 1;
+    }
+    if (added === 0) {
+      alert('펫은 4마리까지라서 더 데려올 수 없어요!');
+      return;
+    }
+    localStorage.setItem(nk('samplePetsAdded'), 'yes');
+    savePets();
+    createPetElements();
+    showPetCards();
+    say(pets.length - 1, '나 다시 왔어!');
   }
 
   // ★ 수정: DB에서 읽어온 펫 넣기 (맨 아래 "처음 열었을 때"에서 불러요)
@@ -6150,14 +6570,18 @@
     // 잡기
     el.addEventListener('mousedown', function (e) {
       e.preventDefault();
-      dragIndex = i;
-      moved = false;
-      petShake = newShake();   // ★ 추가: 휘젓기 감지 새로 시작
-      var rect = el.getBoundingClientRect();
-      grabX = e.clientX - rect.left;
-      grabY = rect.bottom - e.clientY;
-      el.style.cursor = 'grabbing';
+      petDragStart(i, e.clientX, e.clientY);   // ★ 수정: 손가락이랑 같이 쓰려고 함수로
     });
+
+    // ★ 추가: 휴대폰 — 손가락으로 잡기
+    el.addEventListener('touchstart', function (e) {
+      e.preventDefault();   // 화면이 같이 스크롤되지 않게
+      var t = e.touches[0];
+      petDragStart(i, t.clientX, t.clientY);
+      touchDragging = true;
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+    }, { passive: false });
 
     // 클릭하면 기뻐하면서 한마디
     el.addEventListener('click', function () {
@@ -6276,34 +6700,88 @@
   }
   setInterval(talkAllPets, 8000);
 
-  // 잡은 채로 마우스 움직이기 (화면 어디로든)
-  document.addEventListener('mousemove', function (e) {
-    if (dragIndex === -1) {
-      return;
-    }
+  // ★ 수정: 마우스 / 손가락 같이 쓰는 잡기 · 옮기기 · 놓기
+  var touchDragging = false;
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  function petDragStart(i, x, y) {
+    dragIndex = i;
+    moved = false;
+    petShake = newShake();   // ★ 추가: 휘젓기 감지 새로 시작
+    var rect = petEls[i].getBoundingClientRect();
+    grabX = x - rect.left;
+    grabY = rect.bottom - y;
+    petEls[i].style.cursor = 'grabbing';
+  }
+
+  // 잡은 채로 움직이기 (화면 어디로든)
+  function petDragMove(x, y) {
     moved = true;
     var p = pets[dragIndex];
-    p.x = e.clientX - grabX;
-    p.y = window.innerHeight - e.clientY - grabY;
+    p.x = x - grabX;
+    p.y = window.innerHeight - y - grabY;
     keepInScreen(dragIndex);
     // ★ 추가: 잡고 좌우로 휘저으면 어지러워함
-    if (checkShake(petShake, e.clientX) === true) {
+    if (checkShake(petShake, x) === true) {
       say(dragIndex, sampleLine(dragIndex, 'dizzyLine', '으아… 어지러워요 @_@'));   // ★ 수정: 펫마다 대사
     }
     placePet(dragIndex);
+  }
+
+  // ★ 수정: 놓으면 떨어지지 않고 손을 뗀 그 자리에 그대로
+  function petDragEnd() {
+    petEls[dragIndex].style.cursor = 'grab';
+    if (moved === true) {
+      tryEatFood(dragIndex);   // ★ 추가: 음식 위에 내려놓으면 먹기
+    }
+    dragIndex = -1;
+    savePets();
+  }
+
+  document.addEventListener('mousemove', function (e) {
+    if (dragIndex === -1 || touchDragging === true) {
+      return;
+    }
+    petDragMove(e.clientX, e.clientY);
   });
 
-  // ★ 수정: 놓으면 떨어지지 않고 그 자리에 그대로
   document.addEventListener('mouseup', function () {
-    if (dragIndex !== -1) {
-      petEls[dragIndex].style.cursor = 'grab';
-      if (moved === true) {
-        tryEatFood(dragIndex);   // ★ 추가: 음식 위에 내려놓으면 먹기
-      }
-      dragIndex = -1;
-      savePets();
+    if (dragIndex !== -1 && touchDragging === false) {
+      petDragEnd();
     }
   });
+
+  // ★ 추가: 휴대폰 — 손가락으로 옮기기
+  document.addEventListener('touchmove', function (e) {
+    if (dragIndex === -1 || touchDragging === false) {
+      return;
+    }
+    e.preventDefault();   // 펫 옮기는 동안은 화면 스크롤 막기
+    var t = e.touches[0];
+    // 손이 조금 떨리는 건 "옮긴 걸로" 안 쳐요 (톡 누르기랑 구분)
+    if (moved === false && Math.abs(t.clientX - touchStartX) < 6 && Math.abs(t.clientY - touchStartY) < 6) {
+      return;
+    }
+    petDragMove(t.clientX, t.clientY);
+  }, { passive: false });
+
+  // ★ 추가: 휴대폰 — 손 떼기 (안 움직였으면 톡 누른 걸로: 기뻐하면서 한마디)
+  function petTouchEnd() {
+    if (dragIndex === -1 || touchDragging === false) {
+      return;
+    }
+    var i = dragIndex;
+    var wasMoved = moved;
+    petDragEnd();
+    touchDragging = false;
+    if (wasMoved === false) {
+      petReact(i);
+      sayRandom(i);
+    }
+  }
+  document.addEventListener('touchend', petTouchEnd);
+  document.addEventListener('touchcancel', petTouchEnd);
 
   // 3초마다 배고픔 1씩 줄이기 (위치도 같이 저장)
   function getHungryAll() {
@@ -6353,14 +6831,51 @@
     petModalBg.style.display = 'block';
   });
 
-  document.getElementById('closePetModal').addEventListener('click', function () {
+  // ★ 수정: 닫기를 함수로 빼서 닫기 버튼 / 창 바깥 클릭 / Esc 에서 같이 써요
+  function closePetModal() {
     editingLines = -1;
     resetPetForm();   // ★ 추가
     petModalBg.style.display = 'none';
+  }
+  document.getElementById('closePetModal').addEventListener('click', closePetModal);
+
+  // ★ 추가: 창 바깥(어두운 곳)을 누르면 닫기
+  //   창 안에서 누르기 시작해서 바깥에서 뗀 경우(글자 드래그 등)는 안 닫히게,
+  //   누르기 시작한 곳도 바깥이어야 닫혀요
+  closeOnOutsideClick(petModalBg, closePetModal);
+  closeOnOutsideClick(settingModalBg, function () {
+    settingModalBg.style.display = 'none';
+  });
+
+  function closeOnOutsideClick(bg, closeFn) {
+    var downOnBg = false;
+    bg.addEventListener('mousedown', function (e) {
+      downOnBg = e.target === bg;
+    });
+    bg.addEventListener('click', function (e) {
+      if (downOnBg === true && e.target === bg) {
+        closeFn();
+      }
+      downOnBg = false;
+    });
+  }
+
+  // ★ 추가: Esc 키로도 닫기
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') {
+      return;
+    }
+    if (petModalBg.style.display === 'block') {
+      closePetModal();
+    } else if (settingModalBg.style.display === 'block') {
+      settingModalBg.style.display = 'none';
+    }
   });
 
   // 등록된 펫 목록 보여주기
   function showPetCards() {
+    // ★ 추가: 없어진 기본 펫이 있으면 "다시 데려오기" 버튼 보이기
+    document.getElementById('sampleBackBtn').style.display = missingSamplePets().length > 0 ? '' : 'none';
     var html = '';
     if (pets.length === 0) {
       html = '<p class="empty">아직 등록된 펫이 없어요. 아래에서 등록해보세요!</p>';
@@ -6428,18 +6943,17 @@
     if (typeof SAMPLE_PETS === 'undefined') {
       return fallback;
     }
-    for (var k = 0; k < SAMPLE_PETS.length; k++) {
-      if (SAMPLE_PETS[k].name === pets[i].name && SAMPLE_PETS[k][key] !== undefined) {
-        var v = SAMPLE_PETS[k][key];
-        // ★ 추가: [ ] 로 여러 개 넣으면 그중 하나 랜덤
-        if (Array.isArray(v) === true) {
-          if (v.length === 0) {
-            return fallback;
-          }
-          return v[Math.floor(Math.random() * v.length)];
+    var sp = samplePetFor(pets[i]);   // ★ 수정: 이름이 바뀌어도 같은 펫으로 찾기
+    if (sp !== null && sp[key] !== undefined) {
+      var v = sp[key];
+      // ★ 추가: [ ] 로 여러 개 넣으면 그중 하나 랜덤
+      if (Array.isArray(v) === true) {
+        if (v.length === 0) {
+          return fallback;
         }
-        return v;
+        return v[Math.floor(Math.random() * v.length)];
       }
+      return v;
     }
     return fallback;
   }
@@ -7013,13 +7527,10 @@
     // ★ 수정: 이름이 같은 기본 펫(Ay, Eve…)이 있으면 그 펫만의 대사를, 없으면 공통 대사를
     var list = SAMPLE_PET_LINES;
     var whose = '공통';
-    if (typeof SAMPLE_PETS !== 'undefined') {
-      for (var k = 0; k < SAMPLE_PETS.length; k++) {
-        if (SAMPLE_PETS[k].name === pets[i].name && SAMPLE_PETS[k].lines !== undefined) {
-          list = SAMPLE_PETS[k].lines;
-          whose = SAMPLE_PETS[k].name;
-        }
-      }
+    var sp = samplePetFor(pets[i]);   // ★ 수정: 이름이 바뀌어도 같은 펫으로
+    if (sp !== null && sp.lines !== undefined) {
+      list = sp.lines;
+      whose = sp.name;
     }
     // ★ 추가: 지금 대사를 통째로 바꿀지, 뒤에 더할지 고르기
     if (confirm('[' + pets[i].name + '] 지금 대사를 ' + whose + ' 샘플 대사로 통째로 바꿀까요?\n\n확인: 바꾸기 (지금 대사는 지워져요)\n취소: 지금 대사 뒤에 더하기') === true) {
@@ -7118,29 +7629,77 @@
   // =========================================================
   var backupKeys = ['siteTitle', 'ddays', 'todosByDate', 'diaryList', 'pets', 'bgColors', 'darkMode', 'myStickers', 'monthStickers', 'playlistUrl', 'playerVolume', 'theme', 'siteFont', 'boxAlpha', 'bgBlur', 'bgImage'];   // ★ 수정: 테마, 사이트 글꼴도 백업
 
+  // ★ 수정: 모든 노트를 한 파일에 백업
+  //   노트1은 예전 이름표 그대로('diaryList'), 다른 노트는 'n2:diaryList' 처럼 들어가요.
+  //   그래서 예전 백업 파일도 그대로 불러올 수 있어요 (노트1로 들어가요)
   document.getElementById('backupBtn').addEventListener('click', function () {
     saveDiary();
     var data = {};
+    // 모든 노트가 같이 쓰는 작은 것들 (할 일, 디데이, 플레이리스트…)
     for (var i = 0; i < backupKeys.length; i++) {
-      var value = localStorage.getItem(backupKeys[i]);
+      var key = backupKeys[i];
+      if (NOTE_KEYS.indexOf(key) !== -1 || bigKeys.indexOf(key) !== -1) {
+        continue;   // 노트별 / 큰 데이터는 아래에서
+      }
+      var value = localStorage.getItem(key);
       if (value !== null) {
-        data[backupKeys[i]] = value;
+        data[key] = value;
       }
     }
-    // ★ 추가: 큰 데이터는 DB에 있으니까, 지금 화면에 있는 걸 글자로 바꿔서 넣기
-    //   (예전 백업 파일이랑 모양이 같아서 예전 파일도 그대로 불러올 수 있어요)
-    data.diaryList = JSON.stringify(diaries);
-    data.pets = JSON.stringify(pets);
-    data.myStickers = JSON.stringify(myStickers);
-    data.monthStickers = JSON.stringify(monthStickers);   // ★ 추가
-    data.bgImage = JSON.stringify(bgPhoto);   // ★ 추가: 배경 사진
-    // 글자를 파일로 만들어서 다운로드
-    var file = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(file);
-    a.download = '노트백업_' + todayText + '.json';
-    a.click();
+    // 노트마다 따로인 작은 것들 (이름, 테마, 배경색…)
+    for (var n = 0; n < noteList.length; n++) {
+      for (var j = 0; j < NOTE_KEYS.length; j++) {
+        var nKey = noteKeyOf(noteList[n].id, NOTE_KEYS[j]);
+        if (localStorage.getItem(nKey) !== null) {
+          data[nKey] = localStorage.getItem(nKey);
+        }
+      }
+    }
+    data.noteList = JSON.stringify(noteList);
+
+    // 큰 데이터(일기·펫·사진)는 DB에서 모든 노트 것을 읽어오기
+    openDataDB(function (db) {
+      var tx = db.transaction('data', 'readonly');
+      var store = tx.objectStore('data');
+      var got = {};
+      var names = ['myStickers'];   // 같이 쓰는 큰 것
+      for (var m = 0; m < noteList.length; m++) {
+        for (var b = 0; b < NOTE_BIG_KEYS.length; b++) {
+          names[names.length] = noteKeyOf(noteList[m].id, NOTE_BIG_KEYS[b]);
+        }
+      }
+      for (var g = 0; g < names.length; g++) {
+        readInto(store, names[g], got);
+      }
+      tx.oncomplete = function () {
+        for (var k in got) {
+          if (got[k] !== undefined) {
+            data[k] = JSON.stringify(got[k]);
+          }
+        }
+        // 지금 보고 있는 노트는 화면에 있는 게 제일 최신이라 그걸로
+        data[nk('diaryList')] = JSON.stringify(diaries);
+        data[nk('pets')] = JSON.stringify(pets);
+        data[nk('monthStickers')] = JSON.stringify(monthStickers);
+        data[nk('bgImage')] = JSON.stringify(bgPhoto);
+        data.myStickers = JSON.stringify(myStickers);
+        // 글자를 파일로 만들어서 다운로드
+        var file = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(file);
+        a.download = '노트백업_' + todayText + '.json';
+        a.click();
+      };
+    });
   });
+
+  // DB에서 하나 읽어서 got 에 담기 (이름표 그대로)
+  function readInto(store, name, got) {
+    var req = store.get(name);
+    req.onsuccess = function () {
+      got[name] = req.result;
+    };
+  }
 
   var backupInput = document.getElementById('backupInput');
 
@@ -7162,7 +7721,7 @@
         alert('백업 파일이 아니에요!');
         return;
       }
-      if (data.diaryList === undefined && data.todosByDate === undefined && data.ddays === undefined) {
+      if (data.diaryList === undefined && data.todosByDate === undefined && data.ddays === undefined && data.noteList === undefined) {   // ★ 수정
         alert('이 노트의 백업 파일이 아니에요!');
         return;
       }
@@ -7170,17 +7729,21 @@
         return;
       }
       // ★ 수정: 작은 설정은 localStorage로, 큰 데이터(일기·펫·스티커)는 DB로
+      //   'n2:diaryList' 처럼 노트 번호가 붙은 것도 알아보기 (없으면 노트1)
       var bigData = {};
-      for (var i = 0; i < backupKeys.length; i++) {
-        var key = backupKeys[i];
-        if (data[key] === undefined) {
-          continue;
+      for (var key in data) {
+        var base = key;
+        if (key.indexOf(':') !== -1) {
+          base = key.substring(key.indexOf(':') + 1);
         }
-        if (bigKeys.indexOf(key) !== -1) {
+        if (bigKeys.indexOf(base) !== -1) {
           bigData[key] = JSON.parse(data[key]);
-        } else {
+        } else if (backupKeys.indexOf(base) !== -1 || NOTE_KEYS.indexOf(base) !== -1) {
           localStorage.setItem(key, data[key]);
         }
+      }
+      if (data.noteList !== undefined) {
+        localStorage.setItem('noteList', data.noteList);   // ★ 추가: 노트 목록
       }
       // 기다리던 저장이 불러온 내용을 덮어쓰지 않게 취소
       for (var p in saveTimers) {
@@ -7420,7 +7983,7 @@
       alert('유튜브 재생목록이나 영상 주소를 넣어주세요!\n예) https://www.youtube.com/playlist?list=PL...');
       return;
     }
-    localStorage.setItem('playlistUrl', playlistInput.value.trim());
+    localStorage.setItem(nk('playlistUrl'), playlistInput.value.trim());   // ★ 수정: 노트마다 따로
     playMusic(target, false);
   });
   playlistInput.addEventListener('keydown', function (e) {
@@ -7560,7 +8123,7 @@
   if (localStorage.getItem('videoFolded') === 'yes') {
     toggleVideo();
   }
-  var savedPlaylist = localStorage.getItem('playlistUrl');
+  var savedPlaylist = localStorage.getItem(nk('playlistUrl'));   // ★ 수정: 노트마다 따로
   // ★ 추가: 아직 내 재생목록을 안 넣었으면 sample-data.js 의 샘플 재생목록으로
   if (savedPlaylist === null && typeof SAMPLE_PLAYLIST !== 'undefined' && SAMPLE_PLAYLIST !== '') {
     savedPlaylist = SAMPLE_PLAYLIST;
@@ -7856,8 +8419,9 @@
   dbLoadAll(function (saved) {
     loadDiaries(saved.diaryList);
     loadPets(saved.pets);
-    // ★ 추가: 처음 온 사람(저장된 펫이 한 번도 없었던 사람)에게만 기본 펫 넣어주기
-    if (saved.pets === undefined) {
+    // ★ 수정: 기본 펫을 아직 한 번도 못 받았고 펫이 없으면 기본 펫 넣어주기
+    //   (예전엔 "저장된 펫이 없을 때"만이라, 빈 목록이 저장돼 있으면 영영 안 나왔어요)
+    if (saved.pets === undefined || pets.length === 0) {
       addSamplePets();
     }
     if (saved.myStickers !== undefined) {
@@ -7960,6 +8524,160 @@
       closeNotice();
     }
   });
+
+  // =========================================================
+  // ★ 추가: 휴대폰 화면 — 왼쪽 메뉴(디데이·할 일·달력·플레이리스트) / 오른쪽 레이어 창
+  //   PC에선 원래대로 보이고, 화면이 좁을 때(820px 이하)만 서랍처럼 열고 닫아요
+  // =========================================================
+  function toggleLeftPanel() {
+    document.body.classList.remove('layerOpen');
+    document.body.classList.toggle('leftOpen');
+  }
+
+  function toggleLayerPanel() {
+    document.body.classList.remove('leftOpen');
+    document.body.classList.toggle('layerOpen');
+  }
+
+  function closeDrawers() {
+    document.body.classList.remove('leftOpen');
+    document.body.classList.remove('layerOpen');
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeDrawers();
+    }
+  });
+
+
+  // =========================================================
+  // ★ 추가: 노트 고르기 / 만들기 / 이름 바꾸기 / 지우기
+  // =========================================================
+  var noteSelect = document.getElementById('noteSelect');
+  var noteNameInput = document.getElementById('noteNameInput');
+
+  function saveNoteList() {
+    localStorage.setItem('noteList', JSON.stringify(noteList));
+  }
+
+  function renderNoteSelect() {
+    var html = '';
+    for (var i = 0; i < noteList.length; i++) {
+      html = html + '<option value="' + noteList[i].id + '">📒 ' + safeText(noteList[i].name) + '</option>';
+    }
+    html = html + '<option value="__new">＋ 새 노트</option>';
+    noteSelect.innerHTML = html;
+    noteSelect.value = currentNote;
+    noteNameInput.value = noteList[noteIndex(currentNote)].name;
+    // 노트1은 예전 데이터가 들어 있는 기본 노트라 못 지워요
+    document.getElementById('deleteNoteBtn').disabled = currentNote === 'n1';
+  }
+
+  // 저장 중인 게 다 끝나면 새로고침 (안 그러면 쓰던 게 날아갈 수 있어요)
+  function reloadAfterSave() {
+    saveDiary();
+    dbFlush();
+    var waited = 0;
+    var timer = setInterval(function () {
+      waited = waited + 50;
+      if (dbInflight <= 0 || waited > 3000) {
+        clearInterval(timer);
+        location.reload();
+      }
+    }, 50);
+  }
+
+  function switchNote(id) {
+    if (id === currentNote) {
+      return;
+    }
+    localStorage.setItem('currentNote', id);
+    reloadAfterSave();
+  }
+
+  function createNote() {
+    var name = prompt('새 노트 이름을 지어주세요 (예: 행복한 날 일기장)', '노트' + (noteList.length + 1));
+    if (name === null) {
+      noteSelect.value = currentNote;   // 취소하면 원래 노트 그대로
+      return;
+    }
+    name = name.trim();
+    if (name === '') {
+      name = '노트' + (noteList.length + 1);
+    }
+    var id = 'n' + Date.now();
+    noteList[noteList.length] = { id: id, name: name };
+    saveNoteList();
+    localStorage.setItem(noteKeyOf(id, 'siteTitle'), name);   // 새 노트 맨 위 이름도 노트 이름으로
+    localStorage.setItem('currentNote', id);
+    reloadAfterSave();
+  }
+
+  function deleteCurrentNote() {
+    if (currentNote === 'n1') {
+      return;
+    }
+    var name = noteList[noteIndex(currentNote)].name;
+    if (confirm('[' + name + '] 노트를 지울까요?\n이 노트의 일기 · 달력 스티커 · 펫 · 꾸미기가 전부 사라져요. (할 일 · 디데이는 그대로)') === false) {
+      return;
+    }
+    var id = currentNote;
+    for (var i = 0; i < NOTE_KEYS.length; i++) {
+      localStorage.removeItem(noteKeyOf(id, NOTE_KEYS[i]));
+    }
+    var newList = [];
+    for (var j = 0; j < noteList.length; j++) {
+      if (noteList[j].id !== id) {
+        newList[newList.length] = noteList[j];
+      }
+    }
+    noteList = newList;
+    saveNoteList();
+    localStorage.setItem('currentNote', 'n1');
+    // 저장 대기 중인 것도 버리기 (지운 노트에 다시 저장되지 않게)
+    for (var p in saveTimers) {
+      clearTimeout(saveTimers[p]);
+    }
+    pendingSaves = {};
+    dataLoaded = false;
+    openDataDB(function (db) {
+      var tx = db.transaction('data', 'readwrite');
+      var store = tx.objectStore('data');
+      for (var k = 0; k < NOTE_BIG_KEYS.length; k++) {
+        store.delete(noteKeyOf(id, NOTE_BIG_KEYS[k]));
+      }
+      tx.oncomplete = function () {
+        location.reload();
+      };
+      tx.onabort = function () {
+        location.reload();
+      };
+    });
+  }
+
+  noteSelect.addEventListener('change', function () {
+    if (noteSelect.value === '__new') {
+      createNote();
+    } else {
+      switchNote(noteSelect.value);
+    }
+  });
+
+  noteNameInput.addEventListener('input', function () {
+    var name = noteNameInput.value.trim();
+    if (name === '') {
+      return;
+    }
+    noteList[noteIndex(currentNote)].name = name;
+    saveNoteList();
+    var keepInput = noteNameInput.value;
+    renderNoteSelect();
+    noteNameInput.value = keepInput;
+  });
+
+  renderNoteSelect();
+
 
   if (hasNotices() === true) {
     document.getElementById('noticeBtn').style.display = '';
