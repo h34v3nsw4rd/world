@@ -2536,6 +2536,8 @@
     margin-bottom: 10px;
   }
   .noticeItem summary {
+    position: relative;     /* ★ 수정: 날짜를 오른쪽 위에 고정하려고 */
+    padding-right: 84px;    /* 날짜 자리 비워두기 (제목이 길면 이 앞에서 줄바꿈) */
     cursor: pointer;
     line-height: 1.6;
   }
@@ -2544,11 +2546,36 @@
     padding-left: 20px;
     line-height: 1.7;
   }
+  /* ★ 추가: 큰 버전 안의 작은 패치 토글 */
+  .noticeSubs {
+    margin: 10px 0 2px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .noticeSubTitle {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--sub);
+  }
+  .noticeItem.noticeSmall {
+    margin-bottom: 6px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    background: var(--hover);
+  }
+  .noticeItem.noticeSmall:last-child {
+    margin-bottom: 0;
+  }
+  .noticeItem.noticeSmall ul {
+    margin-top: 4px;
+  }
   .noticeDate {
-    float: right;
+    position: absolute;     /* ★ 수정: 제목이 길어도 날짜가 아래로 안 밀리게 오른쪽 위에 고정 */
+    top: 2px;
+    right: 0;
     font-size: 12px;
     opacity: 0.6;
-    margin-left: 8px;
   }
   .noticeNew {
     display: inline-block;
@@ -9507,9 +9534,13 @@
     return PATCH_NOTES[0].version + ' ' + PATCH_NOTES[0].date;
   }
 
-  // 공지 하나를 HTML 로 만들기 (open: 펼쳐서 보여줄지)
-  function noticeHtml(n, open, isNew) {
-    var html = '<details class="noticeItem"';
+  // 공지 하나를 HTML 로 만들기 (open: 펼쳐서 보여줄지, small: 작은 패치 / subs: 안에 넣을 작은 패치 HTML)
+  function noticeHtml(n, open, isNew, small, subs) {
+    var html = '<details class="noticeItem';
+    if (small === true) {
+      html = html + ' noticeSmall';   // ★ 추가: 작은 패치는 안쪽에 작게
+    }
+    html = html + '"';
     if (open === true) {
       html = html + ' open';
     }
@@ -9529,16 +9560,69 @@
     for (var k = 0; k < items.length; k++) {
       html = html + '<li>' + noticeText(items[k]) + '</li>';
     }
-    html = html + '</ul></details>';
+    html = html + '</ul>';
+    // ★ 추가: 작은 패치(v1.4.1, v1.4.2 …)는 큰 버전(v1.4) 안에 토글로
+    if (subs !== undefined && subs !== '') {
+      html = html + '<div class="noticeSubs"><div class="noticeSubTitle">작은 패치</div>' + subs + '</div>';
+    }
+    html = html + '</details>';
     return html;
   }
 
+  // ★ 추가: 'v1.4.3' → 큰 버전 'v1.4' (점이 두 개면 작은 패치)
+  function baseVersion(v) {
+    var parts = String(v).split('.');
+    if (parts.length >= 3) {
+      return parts[0] + '.' + parts[1];
+    }
+    return String(v);
+  }
+
+  function isSmallPatch(v) {
+    return String(v).split('.').length >= 3;
+  }
+
+  // ★ 수정: 큰 버전끼리 묶어서 보여주기 (작은 패치는 큰 버전 안에)
   function openNotice() {
     var unseen = localStorage.getItem('noticeSeen') !== latestNoticeId();
-    var html = '';
+    var newest = PATCH_NOTES[0].version;
+
+    // 큰 버전별로 모으기 (PATCH_NOTES 순서 = 최신부터)
+    var groups = [];
+    var byBase = {};
     for (var i = 0; i < PATCH_NOTES.length; i++) {
-      // 맨 위(최신)만 펼치고, 예전 것들은 눌러야 펼쳐져요
-      html = html + noticeHtml(PATCH_NOTES[i], i === 0, i === 0 && unseen);
+      var n = PATCH_NOTES[i];
+      var base = baseVersion(n.version);
+      if (byBase[base] === undefined) {
+        byBase[base] = { base: base, main: null, smalls: [] };
+        groups[groups.length] = byBase[base];
+      }
+      if (isSmallPatch(n.version)) {
+        byBase[base].smalls[byBase[base].smalls.length] = n;
+      } else {
+        byBase[base].main = n;
+      }
+    }
+
+    var html = '';
+    for (var g = 0; g < groups.length; g++) {
+      var grp = groups[g];
+      var isTop = g === 0;   // 맨 위 묶음만 펼치기
+      // 작은 패치들 (최신부터, 가장 최신 것만 펼치기)
+      var subs = '';
+      for (var k = 0; k < grp.smalls.length; k++) {
+        var sn = grp.smalls[k];
+        var newestHere = sn.version === newest;
+        subs = subs + noticeHtml(sn, isTop && k === 0, newestHere && unseen, true);
+      }
+      var main = grp.main;
+      if (main === null) {
+        // 큰 버전 공지 없이 작은 패치만 있으면 묶음 제목만 만들기
+        main = { version: grp.base, title: '작은 패치 모음', date: grp.smalls[0].date, items: [] };
+      }
+      // 묶음 날짜는 가장 최근 작은 패치 날짜로
+      var shown = { version: main.version, title: main.title, items: main.items, date: grp.smalls.length > 0 ? grp.smalls[0].date : main.date };
+      html = html + noticeHtml(shown, isTop, isTop && unseen && main.version === newest, false, subs);
     }
     document.getElementById('noticeList').innerHTML = html;
     noticeBg.style.display = 'block';
