@@ -1934,7 +1934,7 @@
     gap: 8px;
     padding: 6px 12px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--btn-bg) 60%, transparent);
+    background: var(--btn-bg);   /* ★ 수정: 이미지 저장 도구가 못 읽는 색 계산(color-mix) 대신 그냥 색 */
     border: 1px solid var(--line);
   }
   .navIcon {
@@ -8433,6 +8433,8 @@
         for (var bi = 0; bi < boxes.length; bi++) {
           boxes[bi].style.background = boxRgba;
         }
+        // ★ 추가: 그림 저장 도구가 못 읽는 새 색 문법이 남아 있으면 읽을 수 있는 색으로 바꾸기
+        fixColorsForCapture(doc);
 
         // ★ 추가: 오른쪽 레이어 창이 숨겨지면 일기 칸이 그만큼 넓어져서 오른쪽에 흰 여백이 생겨요.
         //   → 일기 칸은 화면에서 보이던 너비 그대로 고정하고, 남는 자리는 잘라내기
@@ -8475,8 +8477,49 @@
       document.getElementById('imgWithBg').checked = hasPhoto;
       renderImgPreview();
       document.getElementById('imgPreviewBg').style.display = 'block';
+    }).catch(function (e) {
+      // ★ 추가: 실패하면 조용히 멈추지 말고 알려주기
+      alert('이미지로 저장하지 못했어요 😢\n새로고침한 다음 다시 해보고, 계속 안 되면 이 글자를 알려주세요:\n' + e);
     });
   });
+
+  // ★ 추가: "color(srgb 1 0.5 0 / 0.6)" 같은 새 색 문법 → "rgba(255, 128, 0, 0.6)"
+  //   (그림 저장 도구 html2canvas 는 이런 색을 만나면 오류를 내고 멈춰요)
+  function srgbToRgba(v) {
+    var m = v.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/);
+    if (m === null) {
+      return 'transparent';
+    }
+    var a = 1;
+    if (m[4] !== undefined) {
+      a = Number(m[4]);
+    }
+    return 'rgba(' + Math.round(Number(m[1]) * 255) + ', ' + Math.round(Number(m[2]) * 255) + ', ' + Math.round(Number(m[3]) * 255) + ', ' + a + ')';
+  }
+
+  var newColorPattern = /color\(|oklch\(|oklab\(|lab\(|lch\(/;
+
+  function fixColorsForCapture(doc) {
+    var view = doc.defaultView;
+    var colorProps = ['backgroundColor', 'color', 'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor', 'outlineColor', 'textDecorationColor'];
+    var all = doc.querySelectorAll('#captureArea, #captureArea *');
+    for (var i = 0; i < all.length; i++) {
+      var el = all[i];
+      var cs = view.getComputedStyle(el);
+      for (var k = 0; k < colorProps.length; k++) {
+        var v = cs[colorProps[k]];
+        if (v && newColorPattern.test(v)) {
+          el.style[colorProps[k]] = srgbToRgba(v);
+        }
+      }
+      if (newColorPattern.test(cs.boxShadow)) {
+        el.style.boxShadow = 'none';
+      }
+      if (newColorPattern.test(cs.backgroundImage)) {
+        el.style.backgroundImage = 'none';
+      }
+    }
+  }
 
   // ★ 추가: 이미지로 저장 미리보기
   var captured = null;        // 찍어둔 그림 + 펫 모습 (배경만 바꿔서 다시 합칠 수 있게)
