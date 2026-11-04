@@ -1701,19 +1701,28 @@
     #layerBtn {
       display: inline-block;   /* 레이어 창이 없을 땐 JS가 숨겨요 */
     }
-    #headerBtns {
+    /* ★ 수정: 휴대폰에선 아이콘 줄을 아래로 내리고 옆으로 밀어서 보기 */
+    #header {
       display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;          /* 버튼이 많으면 옆으로 밀어서 보기 */
-      width: 100%;
-      gap: 4px;
-      padding-bottom: 2px;
     }
-    #headerBtns button,
-    #headerBtns select {
+    .headLeft {
+      flex: 1;
+      min-width: 0;
+    }
+    .headRight {
+      display: none;
+    }
+    #navIcons {
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 6px 8px;
+    }
+    .navIcon {
       flex-shrink: 0;
-      white-space: nowrap;
-      font-size: 12px;
+      width: 36px;
+      height: 36px;
     }
     #page {
       display: block;
@@ -1821,6 +1830,528 @@
     .item img {
       -webkit-touch-callout: none;   /* 오래 누르면 뜨는 "이미지 저장" 메뉴 막기 */
       -webkit-user-select: none;
+    }
+  }
+
+  /* ★ 추가: 버튼 안의 작은 아이콘 (iconsax) */
+  .ico {
+    width: 16px;
+    height: 16px;
+    vertical-align: -3px;
+    pointer-events: none;
+  }
+  .icoBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 8px;
+  }
+  .icoBtn .ico {
+    vertical-align: 0;
+  }
+  #playBtn .ico {
+    width: 18px;
+    height: 18px;
+  }
+  body.dark .ico {
+    filter: invert(1) brightness(1.6);   /* 어두운 화면에선 밝게 */
+  }
+  /* 고른 버튼(색이 칠해진 버튼) 안의 아이콘은 하얗게 */
+  .active > .ico,
+  #shuffleBtn.active .ico {
+    filter: brightness(0) invert(1);
+  }
+
+  .toolSep {
+    display: inline-block;
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    vertical-align: middle;
+    background: var(--border);
+  }
+  .icoBtn:disabled .ico {
+    opacity: 0.35;
+  }
+
+  /* ★ 추가: 이미지로 저장 미리보기 창 */
+  #imgPreviewBg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 110;
+  }
+  #imgPreviewModal {
+    width: 720px;
+    max-width: calc(100% - 20px);
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 4vh auto 0;
+    padding: 18px 20px;
+    box-sizing: border-box;
+    background: var(--box-bg);
+    color: var(--text);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(var(--tint), 0.2);
+  }
+  #imgPreviewModal h2 {
+    margin: 0 0 10px;
+    font-family: var(--title-font);
+    font-weight: normal;
+  }
+  #imgPreviewWrap {
+    margin: 10px 0;
+    text-align: center;
+    background: repeating-conic-gradient(#e8e8e8 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px;   /* 체크무늬 (빈 곳 보이게) */
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  #imgPreview {
+    display: block;
+    max-width: 100%;
+    max-height: 60vh;
+    margin: 0 auto;
+  }
+
+  /* =========================================================
+     ★ 추가: 맨 위 줄 — 왼쪽 이름, 가운데 동그란 아이콘들
+     ========================================================= */
+  #header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;   /* 왼쪽 | 가운데 아이콘 | 오른쪽(빈칸, 가운데 맞추기용) */
+    align-items: center;
+    gap: 16px;
+  }
+  .headLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  #navIcons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--btn-bg) 60%, transparent);
+    border: 1px solid var(--line);
+  }
+  .navIcon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, box-shadow 0.2s;
+  }
+  .navIcon img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.85;
+    pointer-events: none;
+    transition: transform 0.25s;
+  }
+  .navIcon:hover {
+    transform: translateY(-3px) scale(1.06);   /* 올리면 살짝 떠오르기 */
+    background: var(--hover);
+    box-shadow: 0 6px 14px rgba(var(--tint), 0.18);
+  }
+  .navIcon:hover img {
+    transform: rotate(-10deg);
+  }
+  /* 누르면 통통 튀기 + 물결 퍼지기 */
+  .navIcon.tap {
+    animation: navTap 0.45s;
+  }
+  @keyframes navTap {
+    0% { transform: scale(1); }
+    30% { transform: scale(0.82); }
+    60% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  .navIcon::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .navIcon.tap::before {
+    animation: navRipple 0.5s ease-out;
+  }
+  @keyframes navRipple {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.8); opacity: 0; }
+  }
+  /* 창이 열려 있는 아이콘 */
+  .navIcon.on {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .navIcon.on img {
+    filter: brightness(0) invert(1);
+    opacity: 1;
+  }
+  /* 마우스 올리면 아래에 작은 이름표 */
+  .navIcon::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translate(-50%, -4px);
+    padding: 3px 9px;
+    border-radius: 8px;
+    background: rgba(30, 36, 50, 0.88);   /* 어느 테마에서든 잘 보이게 고정 색 */
+    color: #ffffff;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+    z-index: 120;
+  }
+  @media (hover: hover) {
+    .navIcon:hover::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+  .navIcon.on::after {
+    display: none;
+  }
+  .navSep {
+    width: 1px;
+    height: 22px;
+    margin: 0 2px;
+    background: var(--border);
+  }
+  body.dark .navIcon img {
+    filter: invert(1) brightness(1.6);   /* 어두운 화면에선 아이콘을 밝게 */
+  }
+  body.dark .navIcon.on img {
+    filter: brightness(0) invert(1);
+  }
+
+  /* 아이콘 누르면 나오는 작은 창 */
+  .navPanel {
+    position: fixed;
+    z-index: 105;
+    width: 340px;
+    max-width: calc(100vw - 16px);
+    max-height: 72vh;
+    overflow-y: auto;
+    padding: 16px 18px;
+    box-sizing: border-box;
+    background: var(--box-bg);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: 0 12px 32px rgba(var(--tint), 0.22);
+    transform-origin: top center;
+  }
+  #bgPanel {
+    width: 440px;
+  }
+  .navPanel.show {
+    animation: panelIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.94); }
+    to { opacity: 1; transform: none; }
+  }
+  .navPanel h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
+  }
+  .navPanel h3:not(:first-child) {
+    margin-top: 18px;
+  }
+  .noteItem {
+    display: block;
+    width: 100%;
+    margin-bottom: 6px;
+    text-align: left;
+    border-radius: 12px;
+  }
+  .noteItem.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* =========================================================
+     ★ 추가: 💧 유리 테마 — 거의 투명한 상자 + 물방울 같은 반짝임 + 동글동글
+     ========================================================= */
+  body.glass {
+    --page-bg: #dfe8f5;
+    --box-bg: rgba(255, 255, 255, 0.22);
+    --text: #24304a;
+    --sub: #52617f;
+    --line: rgba(255, 255, 255, 0.45);
+    --border: rgba(255, 255, 255, 0.6);
+    --input-bg: rgba(255, 255, 255, 0.35);
+    --btn-bg: rgba(255, 255, 255, 0.32);
+    --hover: rgba(255, 255, 255, 0.55);
+    --accent: #6ea8fe;
+    --accent-strong: #4f8df5;
+    --today: rgba(255, 255, 255, 0.75);
+    --scroll: rgba(255, 255, 255, 0.6);
+    --tint: 60, 90, 140;
+    --shadow: 0 8px 32px rgba(60, 90, 140, 0.18);
+    /* 사진이 없을 때 깔리는 몽글몽글한 배경 */
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255, 214, 236, 0.9), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(190, 220, 255, 0.95), transparent 45%),
+      radial-gradient(circle at 70% 85%, rgba(200, 245, 230, 0.9), transparent 45%),
+      radial-gradient(circle at 25% 80%, rgba(225, 210, 255, 0.85), transparent 40%);
+    background-attachment: fixed;
+  }
+  body.glass.dark {
+    --box-bg: rgba(20, 28, 48, 0.35);
+    --text: #e8eefc;
+    --sub: #a9b6d3;
+    --line: rgba(255, 255, 255, 0.14);
+    --border: rgba(255, 255, 255, 0.22);
+    --input-bg: rgba(255, 255, 255, 0.08);
+    --btn-bg: rgba(255, 255, 255, 0.1);
+    --hover: rgba(255, 255, 255, 0.2);
+    --today: rgba(255, 255, 255, 0.25);
+    --scroll: rgba(255, 255, 255, 0.25);
+    --tint: 0, 0, 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(120, 80, 160, 0.5), transparent 40%),
+      radial-gradient(circle at 85% 15%, rgba(60, 100, 180, 0.55), transparent 45%),
+      radial-gradient(circle at 70% 85%, rgba(40, 120, 120, 0.45), transparent 45%);
+  }
+  /* 상자: 뒤가 흐릿하게 비치는 유리 + 위쪽 반짝임 + 아주 둥글게 */
+  body.glass .box,
+  body.glass #header,
+  body.glass .navPanel,
+  body.glass #settingModal,
+  body.glass #petModal,
+  body.glass #noticeModal,
+  body.glass #monthModal,
+  body.glass #imgPreviewModal,
+  body.glass #layerPanel,
+  body.glass #stickerPanel {
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--border);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.7),
+      inset 0 -10px 24px rgba(255, 255, 255, 0.06),
+      var(--shadow);
+  }
+  body.glass #settingModal,
+  body.glass #petModal,
+  body.glass #noticeModal,
+  body.glass #monthModal,
+  body.glass #imgPreviewModal,
+  body.glass #layerPanel,
+  body.glass #stickerPanel {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  body.glass.dark #settingModal,
+  body.glass.dark #petModal,
+  body.glass.dark #noticeModal,
+  body.glass.dark #monthModal,
+  body.glass.dark #imgPreviewModal,
+  body.glass.dark #layerPanel,
+  body.glass.dark #stickerPanel,
+  body.glass.dark .navPanel {
+    background: rgba(24, 32, 52, 0.7);
+  }
+  body.glass .navPanel {
+    background: rgba(255, 255, 255, 0.6);
+  }
+  body.glass .box {
+    position: relative;
+    isolation: isolate;
+    border-radius: 28px;
+  }
+  /* 물방울 반짝임: 왼쪽 위에 동그란 빛 */
+  body.glass .box::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 14px;
+    width: 40%;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.45), transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+  }
+  body.glass.dark .box::before {
+    opacity: 0.25;   /* 어두운 유리에선 반짝임을 은은하게 */
+  }
+  /* 배경색을 직접 골랐으면 몽글몽글 배경 대신 그 색 */
+  body.glass.customBg {
+    background-image: none;
+  }
+  body.glass #header {
+    border-bottom: 1px solid var(--line);
+  }
+  body.glass #navIcons {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  /* 버튼 · 아이콘: 볼록한 물방울 */
+  body.glass button,
+  body.glass .navIcon {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px rgba(60, 90, 140, 0.15);
+  }
+  body.glass.dark button,
+  body.glass.dark .navIcon {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+  body.glass button:hover,
+  body.glass .navIcon:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.3));
+  }
+  body.glass .navIcon.on,
+  body.glass .layoutBtn.active,
+  body.glass .patternBtn.active,
+  body.glass .noteItem.active {
+    background: linear-gradient(180deg, #8ec0ff, #5f9cf7);
+    color: #ffffff;
+  }
+  body.glass input[type="text"],
+  body.glass input[type="date"],
+  body.glass input[type="password"],
+  body.glass select {
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+  }
+  body.glass #editorWrap {
+    border-radius: 20px;
+  }
+
+  /* =========================================================
+     ★ 추가: 오른쪽 위 — 공지사항 + 라이트/다크 토글 스위치
+     ========================================================= */
+  .headRight {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  /* 오른쪽 끝 아이콘은 이름표가 화면 밖으로 안 나가게 오른쪽에 맞추기 */
+  .headRight .navIcon::after {
+    left: auto;
+    right: 0;
+    transform: translate(0, -4px);
+  }
+  @media (hover: hover) {
+    .headRight .navIcon:hover::after {
+      transform: translate(0, 0);
+    }
+  }
+  .darkToggle {
+    position: relative;
+    width: 64px;
+    height: 32px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--btn-bg);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .darkToggle:hover {
+    transform: none;
+  }
+  .darkToggle .dtIcon {
+    position: absolute;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .darkToggle .dtSun {
+    left: 9px;
+  }
+  .darkToggle .dtMoon {
+    right: 9px;
+  }
+  /* 미끄러지는 동그라미 */
+  .darkToggle .dtKnob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .darkToggle[aria-checked="true"] {
+    background: #3a4766;
+    border-color: #4c5a7d;
+  }
+  .darkToggle[aria-checked="true"] .dtKnob {
+    transform: translateX(32px);
+    background: #e8eefc;
+  }
+  .darkToggle[aria-checked="true"] .dtIcon {
+    filter: invert(1);
+  }
+  body.glass .darkToggle {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.18));
+  }
+  body.glass .darkToggle[aria-checked="true"] {
+    background: linear-gradient(180deg, rgba(90, 110, 160, 0.6), rgba(40, 50, 80, 0.5));
+  }
+
+  /* ★ 추가: 휴대폰 화면 — 이름 줄 아래에 아이콘 줄 (위의 PC 규칙보다 뒤에 있어야 이겨요) */
+  @media (max-width: 820px) {
+    #header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .headLeft {
+      flex: 1;
+      min-width: 0;
+    }
+    .headRight {
+      display: flex;   /* ★ 수정: 휴대폰에서도 이름 줄 오른쪽에 공지 + 토글 */
+      gap: 6px;
+      order: 2;
+    }
+    #navIcons {
+      order: 3;        /* 아이콘 줄은 이름 줄 아래로 */
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 6px 8px;
+    }
+    .navIcon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+    }
+    .navIcon:hover {
+      transform: none;   /* 손가락으론 '올리기'가 없으니 떠오르기 빼기 */
     }
   }
 
@@ -1955,20 +2486,34 @@
 <!-- ★ 추가: 이미지로 저장할 영역 (제목줄 + 내용) -->
 <div id="captureArea">
 
+<!-- ★ 수정: 맨 위 줄 — 왼쪽 사이트 이름, 가운데 아이콘들 (아이콘: iconsax, icons 폴더) -->
 <div id="header">
-  <button id="menuBtn" class="hideOnCapture" onclick="toggleLeftPanel()" title="디데이 · 할 일 · 달력 · 플레이리스트">☰</button>   <!-- ★ 추가: 휴대폰용 메뉴 -->
-  <h1 id="siteTitle">HeavensNote</h1>   <!-- ★ 수정: 처음 이름 -->
-  <!-- ★ 수정: 이미지 저장할 땐 버튼들 숨기기 -->
-  <div id="headerBtns" class="hideOnCapture">
-    <select id="noteSelect" title="노트 고르기"></select>   <!-- ★ 추가: 노트 여러 권 -->
-    <span id="syncBadge" class="syncBadge"></span>   <!-- ★ 추가: 구글 시트 동기화 상태 -->
-    <button id="noticeBtn" style="display:none;">📢 공지<span id="noticeDot"></span></button>   <!-- ★ 추가: 공지사항 다시 보기 -->
-    <button id="darkBtn">🌙 다크</button>
-    <button id="settingBtn">⚙ 설정</button>
-    <button id="petBtn">🐾 펫</button>
-    <button id="saveImgBtn">🖼 이미지로 저장</button>
-    <button id="backupBtn">💾 백업</button>
-    <button id="loadBtn">📂 불러오기</button>
+  <div class="headLeft">
+    <button id="menuBtn" class="hideOnCapture" onclick="toggleLeftPanel()" title="디데이 · 할 일 · 달력 · 플레이리스트">☰</button>   <!-- 휴대폰용 메뉴 -->
+    <h1 id="siteTitle">HeavensNote</h1>
+  </div>
+  <!-- 이미지로 저장할 땐 아이콘들 숨기기 -->
+  <nav id="navIcons" class="hideOnCapture">
+    <button class="navIcon" id="noteNavBtn" data-tip="노트" onclick="togglePanel('notePanel', this)"><img src="icons/book.svg" alt="노트"></button>
+    <button class="navIcon" id="themeNavBtn" data-tip="테마" onclick="togglePanel('themePanel', this)"><img src="icons/brush-1.svg" alt="테마"></button>
+    <button class="navIcon" id="bgNavBtn" data-tip="배경" onclick="togglePanel('bgPanel', this)"><img src="icons/image.svg" alt="배경"></button>
+    <span class="navSep"></span>
+    <button class="navIcon" id="petBtn" data-tip="펫"><img src="icons/pet.svg" alt="펫"></button>
+    <span class="navSep"></span>
+    <button class="navIcon" id="saveImgBtn" data-tip="이미지로 저장"><img src="icons/camera.svg" alt="이미지로 저장"></button>
+    <button class="navIcon" id="backupBtn" data-tip="백업"><img src="icons/document-download.svg" alt="백업"></button>
+    <button class="navIcon" id="loadBtn" data-tip="불러오기"><img src="icons/document-upload.svg" alt="불러오기"></button>
+    <span class="navSep"></span>
+    <button class="navIcon" id="settingBtn" data-tip="설정"><img src="icons/setting-2.svg" alt="설정"></button>
+  </nav>
+  <!-- ★ 수정: 오른쪽 위 — 라이트/다크 토글 + 공지사항(맨 오른쪽) -->
+  <div class="headRight hideOnCapture">
+    <button id="darkBtn" class="darkToggle" role="switch" aria-checked="false" title="다크 모드 켜기">
+      <img class="dtIcon dtSun" src="icons/sun.svg" alt="">
+      <img class="dtIcon dtMoon" src="icons/moon.svg" alt="">
+      <span class="dtKnob"></span>
+    </button>
+    <button class="navIcon" id="noticeBtn" data-tip="공지사항" style="display:none;"><img src="icons/notification.svg" alt="공지사항"><span id="noticeDot"></span></button>
   </div>
 </div>
 
@@ -2002,12 +2547,12 @@
       <!-- ★ 수정: 크게 보기 버튼 -->
       <div class="calTitleRow">
         <h2>달력</h2>
-        <button class="hideOnCapture" onclick="openMonthView()">🔍 크게 보기</button>
+        <button class="hideOnCapture" onclick="openMonthView()"><img class="ico" src="icons/maximize-4.svg" alt=""> 크게 보기</button>
       </div>
       <div class="calHeader">
-        <button id="prevMonth">◀</button>
+        <button id="prevMonth" class="icoBtn" title="이전 달"><img class="ico" src="icons/caret-left.svg" alt=""></button>   <!-- ★ 수정: 아이콘 -->
         <span id="calTitle"></span>
-        <button id="nextMonth">▶</button>
+        <button id="nextMonth" class="icoBtn" title="다음 달"><img class="ico" src="icons/caret-right.svg" alt=""></button>
       </div>
       <table id="calTable"></table>
     </div>
@@ -2023,16 +2568,17 @@
       <div id="musicTitle">재생목록 주소를 넣고 불러오기를 눌러주세요</div>
       <div id="musicInfo" class="petSmall"></div>
       <div class="musicControls hideOnCapture">
-        <button onclick="musicPrev()" title="이전 곡">⏮</button>
-        <button id="playBtn" onclick="musicToggle()" title="재생 / 멈춤">▶</button>
-        <button onclick="musicNext()" title="다음 곡">⏭</button>
-        <button id="shuffleBtn" onclick="musicShuffle()" title="섞어 듣기">🔀</button>
-        <span class="petSmall">🔊</span>
+        <!-- ★ 수정: 이모지 → 아이콘 -->
+        <button class="icoBtn" onclick="musicPrev()" title="이전 곡"><img class="ico" src="icons/previous.svg" alt=""></button>
+        <button class="icoBtn" id="playBtn" onclick="musicToggle()" title="재생 / 멈춤"><img class="ico" id="playIcon" src="icons/play.svg" alt=""></button>
+        <button class="icoBtn" onclick="musicNext()" title="다음 곡"><img class="ico" src="icons/next.svg" alt=""></button>
+        <button class="icoBtn" id="shuffleBtn" onclick="musicShuffle()" title="섞어 듣기"><img class="ico" src="icons/shuffle.svg" alt=""></button>
+        <span class="petSmall"><img class="ico" src="icons/volume-high.svg" alt=""></span>
         <input type="range" id="volumeInput" min="0" max="100" value="60">
       </div>
       <div class="musicControls hideOnCapture">
-        <button id="videoToggleBtn" onclick="toggleVideo()">📺 영상 접기</button>
-        <button onclick="saveSongToDiary()">📝 일기에 이 곡 남기기</button>
+        <button id="videoToggleBtn" onclick="toggleVideo()"><img class="ico" id="videoIcon" src="icons/video-slash.svg" alt=""> <span id="videoText">영상 접기</span></button>   <!-- ★ 수정 -->
+        <button onclick="saveSongToDiary()"><img class="ico" src="icons/music-square-add.svg" alt=""> 일기에 이 곡 남기기</button>
       </div>
     </div>
   </div>
@@ -2044,16 +2590,16 @@
       <!-- ★ 추가: 그날 일기 목록 화면 -->
       <div id="diaryListView">
         <ul id="diaryItems"></ul>
-        <button id="newDiaryBtn" class="hideOnCapture">✏️ 새 일기 쓰기</button>
+        <button id="newDiaryBtn" class="hideOnCapture"><img class="ico" src="icons/edit-2.svg" alt=""> 새 일기 쓰기</button>
       </div>
 
       <!-- ★ 추가: 일기 쓰는 화면 (처음엔 숨김) -->
       <div id="diaryWriteView" style="display:none;">
         <div class="writeTop">
-          <button id="backToListBtn" class="hideOnCapture">← 목록</button>
+          <button id="backToListBtn" class="hideOnCapture"><img class="ico" src="icons/arrow-circle-left.svg" alt=""> 목록</button>
           <input type="text" id="diaryTitleInput" placeholder="제목">
-          <button id="deleteDiaryBtn" class="hideOnCapture">🗑 삭제</button>
-          <button id="layerBtn" class="hideOnCapture" onclick="toggleLayerPanel()" style="display:none;">🗂 레이어</button>   <!-- ★ 추가: 휴대폰용 레이어 창 버튼 -->
+          <button id="deleteDiaryBtn" class="hideOnCapture"><img class="ico" src="icons/trash.svg" alt=""> 삭제</button>
+          <button id="layerBtn" class="hideOnCapture" onclick="toggleLayerPanel()" style="display:none;"><img class="ico" src="icons/layer.svg" alt=""> 레이어</button>   <!-- ★ 추가: 휴대폰용 레이어 창 버튼 -->
         </div>
 
         <!-- ★ 추가: 오늘의 노래 -->
@@ -2064,6 +2610,10 @@
         </div>
 
         <div id="toolbar" class="hideOnCapture">   <!-- ★ 수정: 이미지 저장할 땐 숨김 -->
+          <!-- ★ 추가: 되돌리기 / 다시 하기 (Ctrl+Z / Ctrl+Y) -->
+          <button class="icoBtn" id="undoBtn" onclick="undoDiary()" title="되돌리기 (Ctrl+Z)" disabled><img class="ico" src="icons/undo.svg" alt=""></button>
+          <button class="icoBtn" id="redoBtn" onclick="redoDiary()" title="다시 하기 (Ctrl+Y)" disabled><img class="ico" src="icons/redo.svg" alt=""></button>
+          <span class="toolSep"></span>
           <button onclick="format('bold')"><b>B</b></button>
           <button onclick="format('underline')"><u>U</u></button>
           <button onclick="format('strikeThrough')"><s>S</s></button>
@@ -2083,9 +2633,10 @@
 
           <!-- ★ 추가: 정렬 -->
           <span class="label">정렬</span>
-          <button onclick="format('justifyLeft')">왼쪽</button>
-          <button onclick="format('justifyCenter')">가운데</button>
-          <button onclick="format('justifyRight')">오른쪽</button>
+          <!-- ★ 수정: 글자 → 아이콘 (마우스 올리면 이름) -->
+          <button class="icoBtn" onclick="format('justifyLeft')" title="왼쪽 정렬"><img class="ico" src="icons/textalign-left.svg" alt=""></button>
+          <button class="icoBtn" onclick="format('justifyCenter')" title="가운데 정렬"><img class="ico" src="icons/textalign-center.svg" alt=""></button>
+          <button class="icoBtn" onclick="format('justifyRight')" title="오른쪽 정렬"><img class="ico" src="icons/textalign-right.svg" alt=""></button>
 
           <!-- ★ 추가: 목록 -->
           <span class="label">목록</span>
@@ -2105,12 +2656,12 @@
 
           <!-- ★ 추가: 사진 -->
           <span class="label">사진</span>
-          <button onclick="pickImage()">🖼 넣기</button>
+          <button onclick="pickImage()"><img class="ico" src="icons/image-add.svg" alt=""> 넣기</button>   <!-- ★ 수정 -->
           <input type="file" id="imgInput" accept="image/*" style="display:none;">
 
           <!-- ★ 추가: 스티커 -->
           <span class="label">스티커</span>
-          <button id="stickerBtn" onclick="toggleStickerPanel()">⭐ 붙이기</button>
+          <button id="stickerBtn" onclick="toggleStickerPanel()"><img class="ico" src="icons/sticker.svg" alt=""> 붙이기</button>   <!-- ★ 수정 -->
 
           <span class="label">글자색</span>
           <button class="swatch" style="background:#000000" onclick="textColor('#000000')"></button>
@@ -2132,9 +2683,10 @@
 
           <!-- ★ 추가: 레이아웃 -->
           <span class="label">레이아웃</span>
-          <button class="layoutBtn" id="layoutNormalBtn" onclick="changeLayout('normal')">📄 기본</button>
-          <button class="layoutBtn" id="layoutNewsBtn" onclick="changeLayout('news')">📰 뉴스</button>
-          <button class="layoutBtn" id="layoutBoardBtn" onclick="changeLayout('board')">📌 작업대</button>   <!-- ★ 추가 -->
+          <!-- ★ 수정: 이모지 → 아이콘 -->
+          <button class="layoutBtn" id="layoutNormalBtn" onclick="changeLayout('normal')"><img class="ico" src="icons/document-text-1.svg" alt=""> 기본</button>
+          <button class="layoutBtn" id="layoutNewsBtn" onclick="changeLayout('news')"><img class="ico" src="icons/receipt-text.svg" alt=""> 뉴스</button>
+          <button class="layoutBtn" id="layoutBoardBtn" onclick="changeLayout('board')"><img class="ico" src="icons/menu-board.svg" alt=""> 작업대</button>
         </div>
 
         <!-- ★ 수정: 글 칸을 틀로 감싸고, 뉴스용 오른쪽 칸 + 가운데 선 추가 -->
@@ -2166,6 +2718,12 @@
               <h4>무늬 선 색</h4>
               <div class="palette" id="patternPalette"></div>
               <input type="color" id="patternColorInput">
+              <!-- ★ 추가: 무늬 투명도 -->
+              <h4>무늬 투명도</h4>
+              <div class="setRow">
+                <input type="range" id="patternAlphaInput" min="0" max="100" step="5">
+                <span id="patternAlphaText" class="petSmall"></span>
+              </div>
             </div>
 
             <!-- ★ 추가: 고른 글상자/메모지 꾸미기 -->
@@ -2191,15 +2749,16 @@
             <div id="itemSection">
               <h4>붙이기</h4>
               <div class="addBtns">
-                <button onclick="addTextBox()">📝 글상자</button>
-                <button onclick="addPhotoBox()">🖼 사진</button>
-                <button onclick="addMemo()">🗒 메모지</button>
+                <!-- ★ 수정: 이모지 → 아이콘 -->
+                <button onclick="addTextBox()"><img class="ico" src="icons/text-block.svg" alt=""> 글상자</button>
+                <button onclick="addPhotoBox()"><img class="ico" src="icons/image-add.svg" alt=""> 사진</button>
+                <button onclick="addMemo()"><img class="ico" src="icons/note-1.svg" alt=""> 메모지</button>
               </div>
 
               <h4>글상자·사진 레이어 <span class="petSmall">(위가 앞)</span></h4>
               <ul id="layerList"></ul>
             </div>
-            <p class="empty">줄을 끌어서 순서를 바꾸거나 ▲ ▼ 를 누르세요.<br>스티커는 늘 글상자·사진보다 위에 있어요.<br>사진은 두 번 누르면 바꿀 수 있어요.</p>
+            <p class="empty">줄을 끌어서 순서를 바꾸거나 위·아래 화살표를 누르세요.<br>스티커는 늘 글상자·사진보다 위에 있어요.<br>사진은 두 번 누르면 바꿀 수 있어요.</p>
           </div>
         </div>
         <input type="file" id="photoInput" accept="image/*" style="display:none;">   <!-- ★ 추가 -->
@@ -2213,6 +2772,20 @@
 <!-- ★ 추가: 휴대폰에서 메뉴/레이어 창 열렸을 때 뒤 어둡게 (누르면 닫혀요) -->
 <div id="drawerShade" onclick="closeDrawers()"></div>
 
+<!-- ★ 추가: 이미지로 저장 미리보기 창 -->
+<div id="imgPreviewBg" style="display:none;">
+  <div id="imgPreviewModal">
+    <h2>🖼 이미지로 저장</h2>
+    <label id="imgWithBgRow"><input type="checkbox" id="imgWithBg" checked> 배경 사진까지 같이 저장</label>
+    <div id="imgPreviewWrap"><img id="imgPreview" alt="저장될 그림 미리보기"></div>
+    <p class="petSmall" id="imgPreviewTip">휴대폰에선 그림을 길게 눌러서 사진에 저장해도 돼요.</p>
+    <div class="setRow" style="justify-content:flex-end;">
+      <button onclick="downloadPreview()">💾 저장하기</button>
+      <button onclick="closeImgPreview()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <!-- ★ 추가: 공지사항(패치노트) 창 (처음엔 숨김) -->
 <div id="noticeModalBg" style="display:none;">
   <div id="noticeModal">
@@ -2222,34 +2795,28 @@
   </div>
 </div>
 
-<!-- ★ 추가: 설정 창 (처음엔 숨김) -->
-<div id="settingModalBg" style="display:none;">
-  <div id="settingModal">
-    <h2>⚙ 설정</h2>
+<!-- ★ 추가: 위쪽 아이콘을 누르면 나오는 작은 창들 (설정에 몰려 있던 것들을 나눴어요) -->
+<div id="notePanel" class="navPanel" style="display:none;">
+  <h3>📚 노트</h3>
+  <div id="noteListBox"></div>
+  <div class="setRow">
+    <span class="setLabel">지금 노트 이름</span>
+    <input type="text" id="noteNameInput" maxlength="20">
+  </div>
+  <div class="setRow">
+    <button onclick="createNote()">＋ 새 노트 만들기</button>
+    <button id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑 이 노트 지우기</button>
+  </div>
+  <p class="empty">노트마다 일기 · 달력 스티커 · 펫 · 플레이리스트 · 꾸미기가 따로예요. 할 일 · 디데이 · 내 스티커는 같이 써요.</p>
+</div>
 
-    <!-- ★ 추가: 노트 관리 -->
-    <h3>📚 노트</h3>
-    <div class="setRow">
-      <span class="setLabel">지금 노트 이름</span>
-      <input type="text" id="noteNameInput" maxlength="20">
-    </div>
-    <div class="setRow">
-      <button onclick="createNote()">＋ 새 노트 만들기</button>
-      <button id="deleteNoteBtn" onclick="deleteCurrentNote()">🗑 이 노트 지우기</button>
-    </div>
-    <p class="empty">노트마다 일기 · 달력 스티커 · 펫 · 플레이리스트 · 꾸미기(이름, 테마, 배경, 글꼴, 투명도)가 따로예요. 할 일 · 디데이 · 내 스티커는 모든 노트가 같이 써요.</p>
-
-    <h3>사이트 이름</h3>
-    <div class="setRow">
-      <input type="text" id="siteTitleInput">
-    </div>
-
+<div id="themePanel" class="navPanel" style="display:none;">
     <!-- ★ 추가: 테마 -->
-    <h3>테마</h3>
+    <h3>🎨 테마</h3>
     <div class="setRow">
       <div id="themeBtns"></div>
     </div>
-    <p class="empty">🌙 다크 모드는 위쪽 다크 버튼으로 켜고 끌 수 있어요. (다크 모드에선 남색 테마)</p>
+    <p class="empty">🌙 다크 모드는 위쪽 달 아이콘으로 켜고 꺼요.</p>
 
     <!-- ★ 추가: UI 설정 (상자 투명도) -->
     <h3>UI 설정</h3>
@@ -2268,7 +2835,10 @@
     </div>
     <p class="empty">제목, 버튼, 할 일 같은 페이지 전체 글꼴이에요. 일기 본문은 일기 안에서 고른 글꼴 그대로예요.</p>
 
-    <h3>배경색</h3>
+</div>
+
+<div id="bgPanel" class="navPanel" style="display:none;">
+    <h3>🖼 배경색</h3>
     <div class="setRow">
       <span class="setLabel">☀️ 기본 모드</span>
       <div class="palette" id="lightPalette"></div>
@@ -2299,22 +2869,17 @@
     </div>
     <p class="empty">사진이 있으면 배경색 대신 사진이 보여요. 다크 모드에선 사진이 조금 어둡게 보여요.</p>
 
-    <!-- ★ 추가: 구글 시트 동기화 -->
-    <h3>☁️ 구글 시트 동기화 <span class="petSmall">(할 일 · 디데이)</span></h3>
+</div>
+
+<!-- ★ 추가: 설정 창 (처음엔 숨김) -->
+<div id="settingModalBg" style="display:none;">
+  <div id="settingModal">
+    <h2>⚙ 설정</h2>
+
+    <h3>사이트 이름</h3>
     <div class="setRow">
-      <span class="setLabel">웹 앱 주소 (https://script.google.com/… /exec)</span>
-      <input type="text" id="syncUrlInput" class="syncInput" placeholder="https://script.google.com/macros/s/…/exec">
+      <input type="text" id="siteTitleInput">
     </div>
-    <div class="setRow">
-      <span class="setLabel">암호 (Code.gs 맨 위 SECRET 이랑 똑같이)</span>
-      <input type="password" id="syncSecretInput" class="syncInput">
-    </div>
-    <div class="setRow">
-      <button onclick="connectSync()">연결하고 맞추기</button>
-      <button onclick="pullAndMerge()">지금 받아오기</button>
-      <button onclick="disconnectSync()">연결 끊기</button>
-    </div>
-    <p id="syncStatus" class="petSmall">연결 안 됨</p>
 
     <!-- ★ 추가: 저장 공간 -->
     <h3>저장 공간</h3>
@@ -2339,9 +2904,9 @@
 <div id="monthModalBg" style="display:none;">
   <div id="monthModal">
     <div class="monthHeader">
-      <button onclick="moveMonthView(-1)">◀</button>
+      <button class="icoBtn" onclick="moveMonthView(-1)" title="이전 달"><img class="ico" src="icons/caret-left.svg" alt=""></button>   <!-- ★ 수정: 아이콘 -->
       <h2 id="monthTitle"></h2>
-      <button onclick="moveMonthView(1)">▶</button>
+      <button class="icoBtn" onclick="moveMonthView(1)" title="다음 달"><img class="ico" src="icons/caret-right.svg" alt=""></button>
       <span class="petSmall">날짜를 누르면 그 날로 가요 · 체크하면 완료</span>
       <!-- ★ 추가: 달력 스티커 투명도 -->
       <div id="monthStickerOptions" class="monthOpt" style="display:none;">
@@ -2350,7 +2915,7 @@
         <span id="monthStickerOpacityText" class="petSmall">100%</span>
       </div>
       <div class="monthBtns">
-        <button id="monthStickerBtn" onclick="toggleStickerPanel('msticker')">⭐ 스티커</button>
+        <button id="monthStickerBtn" onclick="toggleStickerPanel('msticker')"><img class="ico" src="icons/sticker.svg" alt=""> 스티커</button>   <!-- ★ 수정: 아이콘 -->
         <button onclick="closeMonthView()">닫기</button>
       </div>
     </div>
@@ -2411,6 +2976,11 @@
     <button id="sampleBackBtn" onclick="bringBackSamplePets()" style="display:none;">🐾 기본 펫 다시 데려오기</button>
 
     <!-- ★ 추가: 바닥에 떨어지는 음식 -->
+    <!-- ★ 추가: 펫 크기 (모든 펫 같이) -->
+    <h3>📏 펫 크기</h3>
+    <div class="addBtns" id="petSizeBtns"></div>
+    <p class="petSmall" style="margin:6px 0 0;">모든 펫에 같이 적용돼요.</p>
+
     <h3>🍙 바닥에 떨어지는 음식</h3>
     <div class="addBtns" id="foodFreqBtns"></div>
     <p class="petSmall" style="margin:6px 0 0;">
@@ -2701,6 +3271,11 @@
   var siteTitle = document.getElementById('siteTitle');
 
   var savedSiteTitle = localStorage.getItem(nk('siteTitle'));   // ★ 수정: 노트마다 따로
+  // ★ 추가: 예전 기본 이름(나의 노트)으로 저장돼 있으면 새 기본 이름 HeavensNote 로
+  if (savedSiteTitle === '📒 나의 노트' || savedSiteTitle === '나의 노트') {
+    localStorage.removeItem(nk('siteTitle'));
+    savedSiteTitle = null;
+  }
   if (savedSiteTitle !== null) {
     siteTitle.textContent = savedSiteTitle;
     document.title = savedSiteTitle;
@@ -2740,7 +3315,7 @@
   // ★ 추가: 배경색 + 다크 모드
   // =========================================================
   // ★ 수정: 테마마다 기본 배경색이 달라요 (설정에서 직접 고른 색이 있으면 그 색)
-  var themeBg = { sky: '#eef3f8', pink: '#fbeff1', dark: '#171c26' };
+  var themeBg = { sky: '#eef3f8', pink: '#fbeff1', glass: '#dfe8f5', dark: '#171c26' };   // ★ 수정: 유리 테마
 
   // 동그라미로 빨리 고를 수 있는 색들 (★ 수정: 하늘 · 핑크 · 남색 계열 추가)
   var paletteColors = {
@@ -2771,11 +3346,13 @@
   // ★ 추가: 테마 ('sky' 하늘 / 'pink' 핑크)
   var themes = [
     { name: '❄️ 하늘', value: 'sky' },
-    { name: '🌸 핑크', value: 'pink' }
+    { name: '🌸 핑크', value: 'pink' },
+    { name: '💧 유리', value: 'glass' }   // ★ 추가: 유리 테마
   ];
   var theme = 'sky';
-  if (localStorage.getItem(nk('theme')) === 'pink') {   // ★ 수정: 노트마다 따로
-    theme = 'pink';
+  var savedTheme = localStorage.getItem(nk('theme'));   // ★ 수정: 노트마다 따로
+  if (savedTheme === 'pink' || savedTheme === 'glass') {   // ★ 수정: 유리 테마도
+    theme = savedTheme;
   }
 
   var darkBtn = document.getElementById('darkBtn');
@@ -2801,19 +3378,22 @@
 
   // 화면에 모드 + 배경색 적용
   function applyTheme() {
+    // ★ 수정: 다크 버튼은 아이콘(달 ↔ 해)으로
     if (darkMode === true) {
       document.body.classList.add('dark');
-      darkBtn.textContent = '☀️ 라이트';
+      darkBtn.setAttribute('aria-checked', 'true');   // ★ 수정: 토글 스위치 (동그라미가 오른쪽으로)
+      darkBtn.title = '라이트 모드로';
     } else {
       document.body.classList.remove('dark');
-      darkBtn.textContent = '🌙 다크';
+      darkBtn.setAttribute('aria-checked', 'false');   // ★ 수정: 토글 스위치 (동그라미가 왼쪽으로)
+      darkBtn.title = '다크 모드로';
     }
-    // ★ 추가: 핑크 테마
-    if (theme === 'pink') {
-      document.body.classList.add('pink');
-    } else {
-      document.body.classList.remove('pink');
-    }
+    // ★ 수정: 핑크 · 유리 테마
+    document.body.classList.toggle('pink', theme === 'pink');
+    document.body.classList.toggle('glass', theme === 'glass');
+    // ★ 추가: 지금 모드에서 배경색을 직접 골랐는지 (유리 테마의 몽글몽글 배경을 끌지 정하려고)
+    var modeKey = darkMode === true ? 'dark' : 'light';
+    document.body.classList.toggle('customBg', bgColors[modeKey] !== null && bgColors[modeKey] !== undefined);
     document.body.style.setProperty('--page-bg', currentPageBg());
   }
 
@@ -2969,7 +3549,13 @@
   }
   var bgBlurInput = document.getElementById('bgBlurInput');
 
+  var bgPhotoImg = null;   // ★ 추가: 이미지로 저장할 때 그리려고 미리 불러둔 사진
+
   function applyBgPhoto() {
+    if (bgPhoto !== null && bgPhoto !== undefined && (bgPhotoImg === null || bgPhotoImg.src !== bgPhoto)) {
+      bgPhotoImg = new Image();
+      bgPhotoImg.src = bgPhoto;
+    }
     if (bgPhoto === null || bgPhoto === undefined) {
       bgPhotoEl.style.display = 'none';
       bgPhotoEl.style.backgroundImage = '';
@@ -3029,7 +3615,6 @@
 
   function saveDdays() {
     localStorage.setItem('ddays', JSON.stringify(ddays));
-    markChanged('ddays');   // ★ 추가: 구글 시트에 올릴 준비
     showCalendar();
   }
 
@@ -3165,7 +3750,6 @@
 
   function saveTodos() {
     localStorage.setItem('todosByDate', JSON.stringify(todosByDate));
-    markChanged('todosByDate');   // ★ 추가: 구글 시트에 올릴 준비
   }
 
   // 지금 고른 날짜의 할 일 배열 (없으면 빈 배열)
@@ -3498,6 +4082,9 @@
     renderLayerPanel();
     renderBoardControls();
     showDiaryMusic(diary);   // ★ 추가: 오늘의 노래
+    if (restoringHistory === false) {
+      resetHistory();        // ★ 추가: 새로 연 일기는 되돌리기 기록을 처음부터
+    }
   }
 
   // 새 일기
@@ -3548,7 +4135,133 @@
     diary.stickers = stickers;    // ★ 추가
     diary.board = board;          // ★ 추가
     saveDiaries();
+    recordHistoryLater();         // ★ 추가: 되돌리기용으로 지금 모습 기억
   }
+
+  // =========================================================
+  // ★ 추가: 일기 되돌리기 / 다시 하기
+  //   일기가 바뀔 때마다(글, 제목, 스티커, 테이프, 사진, 글상자, 레이아웃, 종이색…)
+  //   그 순간 모습을 기억해 두고, 앞뒤로 오가요. 일기를 새로 열면 처음부터 다시 기억해요.
+  //   글 칠 때마다 한 글자씩 되돌아가면 불편하니까 0.5초 쉬면 한 번 기억해요.
+  // =========================================================
+  var diaryHistory = [];        // 기억해 둔 모습들 (글자로 바꿔서)
+  var historyPos = -1;     // 지금 몇 번째 모습인지
+  var historyTimer = null;
+  var HISTORY_MAX = 50;    // 너무 많이 기억하면 느려지니까 50번까지
+  var restoringHistory = false;
+
+  // 지금 열린 일기 모습을 글자 하나로
+  function diarySnapshot() {
+    var d = diaries[selectedDate][currentIndex];
+    return JSON.stringify({
+      title: d.title, content: d.content, layout: d.layout, bg: d.bg,
+      items: d.items, stickers: d.stickers, board: d.board
+    });
+  }
+
+  function resetHistory() {
+    clearTimeout(historyTimer);
+    diaryHistory = [diarySnapshot()];
+    historyPos = 0;
+    updateHistoryBtns();
+  }
+
+  function recordHistoryLater() {
+    if (restoringHistory === true || currentIndex === -1) {
+      return;
+    }
+    clearTimeout(historyTimer);
+    historyTimer = setTimeout(recordHistoryNow, 500);
+  }
+
+  function recordHistoryNow() {
+    clearTimeout(historyTimer);
+    if (currentIndex === -1) {
+      return;
+    }
+    var snap = diarySnapshot();
+    if (snap === diaryHistory[historyPos]) {
+      return;   // 바뀐 게 없으면 안 기억
+    }
+    diaryHistory = diaryHistory.slice(0, historyPos + 1);   // 되돌린 뒤에 새로 바꾸면, 앞으로 가기 기록은 버려요
+    diaryHistory[diaryHistory.length] = snap;
+    if (diaryHistory.length > HISTORY_MAX) {
+      diaryHistory.shift();
+    }
+    historyPos = diaryHistory.length - 1;
+    updateHistoryBtns();
+  }
+
+  function updateHistoryBtns() {
+    document.getElementById('undoBtn').disabled = historyPos <= 0;
+    document.getElementById('redoBtn').disabled = historyPos >= diaryHistory.length - 1;
+  }
+
+  // 기억해 둔 모습으로 일기 바꾸기
+  function restoreHistory(pos) {
+    var snap = JSON.parse(diaryHistory[pos]);
+    var d = diaries[selectedDate][currentIndex];
+    d.title = snap.title;
+    d.content = snap.content;
+    d.layout = snap.layout;
+    d.bg = snap.bg;
+    d.items = snap.items;
+    d.stickers = snap.stickers;
+    d.board = snap.board;
+    historyPos = pos;
+    restoringHistory = true;
+    var scroll = editorWrap.scrollTop;
+    openDiary(currentIndex);       // 화면 다시 그리기
+    editorWrap.scrollTop = scroll; // 보던 자리 그대로
+    saveDiaries();
+    restoringHistory = false;
+    updateHistoryBtns();
+  }
+
+  function undoDiary() {
+    if (currentIndex === -1) {
+      return;
+    }
+    if (currentLayout !== 'normal') {
+      syncTextBoxes();
+    }
+    saveDiary();
+    recordHistoryNow();   // 아직 기억 안 한 마지막 변화부터 기억
+    if (historyPos > 0) {
+      restoreHistory(historyPos - 1);
+    }
+  }
+
+  function redoDiary() {
+    if (currentIndex === -1) {
+      return;
+    }
+    recordHistoryNow();
+    if (historyPos < diaryHistory.length - 1) {
+      restoreHistory(historyPos + 1);
+    }
+  }
+
+  // 단축키: Ctrl+Z 되돌리기 / Ctrl+Y 또는 Ctrl+Shift+Z 다시 하기 (Mac은 Cmd)
+  document.addEventListener('keydown', function (e) {
+    if (currentIndex === -1 || (e.ctrlKey !== true && e.metaKey !== true)) {
+      return;
+    }
+    // 일기 밖의 입력칸(할 일, 플레이리스트 주소 등)에선 원래 기능 그대로
+    var t = e.target;
+    var inDiary = t === document.body || t.closest('#diaryWriteView') !== null;
+    if (inDiary === false) {
+      return;
+    }
+    var key = e.key.toLowerCase();
+    if (key === 'z' && e.shiftKey !== true) {
+      e.preventDefault();
+      undoDiary();
+    } else if (key === 'y' || (key === 'z' && e.shiftKey === true)) {
+      e.preventDefault();
+      redoDiary();
+    }
+  });
 
   // ★ 수정: 지금 레이아웃대로 화면 보여주기
   function applyLayout() {
@@ -4846,7 +5559,8 @@
   // ★ 추가: 찍힌 그림 + 펫 합치기
   //   펫은 보통 창 맨 아래 바닥을 걸어다녀서, 찍는 범위(제목줄~내용 상자) 밖에 있을 때가 많아요.
   //   그래서 펫·말풍선이 밖에 있으면 그만큼 그림을 넓히고 배경색으로 채운 다음 그려요.
-  function composeWithPets(canvas, shots, scale) {
+  // ★ 수정: withPhoto 가 true 면 배경 사진(흐리기 · 다크 모드 어둡게 포함)을 맨 아래에 그려요
+  function composeWithPets(canvas, shots, scale, withPhoto) {
     var minX = 0;
     var minY = 0;
     var maxX = canvas.width / scale;
@@ -4870,9 +5584,63 @@
     var ctx = out.getContext('2d');
     ctx.fillStyle = currentPageBg();
     ctx.fillRect(0, 0, out.width, out.height);
+    if (withPhoto === true) {
+      drawBgPhoto(ctx, out.width, out.height, scale);   // ★ 추가: 배경 사진
+    }
     ctx.drawImage(canvas, Math.round(-minX * scale), Math.round(-minY * scale));
     drawPetShots(out, shots, scale, -minX, -minY);
     return out;
+  }
+
+  // ★ 추가: 배경 사진을 그림 전체에 꽉 차게(화면처럼 cover) 그리기
+  function drawBgPhoto(ctx, W, H, scale) {
+    if (bgPhotoImg === null || bgPhotoImg.naturalWidth === 0) {
+      return;
+    }
+    var img = bgPhotoImg;
+    var blur = bgBlur * scale;          // 화면에서 흐린 만큼 (저장 그림은 2배 크기)
+    var pad = blur * 2;                 // 흐리면 가장자리가 하얗게 번져서 조금 크게 그리기
+    var boxW = W + pad * 2;
+    var boxH = H + pad * 2;
+    var r = Math.max(boxW / img.naturalWidth, boxH / img.naturalHeight);
+    var dw = img.naturalWidth * r;
+    var dh = img.naturalHeight * r;
+    var dx = (W - dw) / 2;
+    var dy = (H - dh) / 2;
+
+    ctx.save();
+    if (typeof ctx.filter === 'string') {
+      // 대부분의 브라우저: 그림 그릴 때 바로 흐리기 + 다크 모드면 어둡게
+      var f = '';
+      if (blur > 0) {
+        f = 'blur(' + blur + 'px)';
+      }
+      if (darkMode === true) {
+        f = f + ' brightness(0.6)';
+      }
+      if (f !== '') {
+        ctx.filter = f;
+      }
+      ctx.drawImage(img, dx, dy, dw, dh);
+    } else {
+      // 흐리기를 못 하는 브라우저(일부 사파리): 작게 줄였다가 크게 늘려서 비슷하게 흐리기
+      var src = img;
+      if (blur > 0) {
+        var k = 1 + blur / 3;
+        var small = document.createElement('canvas');
+        small.width = Math.max(1, Math.round(dw / k));
+        small.height = Math.max(1, Math.round(dh / k));
+        small.getContext('2d').drawImage(img, 0, 0, small.width, small.height);
+        src = small;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(src, dx, dy, dw, dh);
+      if (darkMode === true) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, W, H);
+      }
+    }
+    ctx.restore();
   }
 
   // 찍힌 그림 위에 펫·말풍선 얹기 (ox, oy: 넓힌 만큼 밀어서 그리기)
@@ -5224,8 +5992,8 @@
       html = html + '<li class="layerRow" draggable="true" data-kind="' + kind + '" data-index="' + i + '" onclick="selectFromPanel(\'' + kind + '\', ' + i + ')">'
         + '<span>' + icon + '</span>'
         + '<span class="layerName">' + label + '</span>'
-        + '<button onclick="event.stopPropagation(); moveLayer(\'' + kind + '\', ' + i + ', 1)" title="앞으로">▲</button>'
-        + '<button onclick="event.stopPropagation(); moveLayer(\'' + kind + '\', ' + i + ', -1)" title="뒤로">▼</button>'
+        + '<button class="icoBtn" onclick="event.stopPropagation(); moveLayer(\'' + kind + '\', ' + i + ', 1)" title="앞으로"><img class="ico" src="icons/chevron-up.svg" alt=""></button>'   // ★ 수정: 꺾쇠 아이콘
+        + '<button class="icoBtn" onclick="event.stopPropagation(); moveLayer(\'' + kind + '\', ' + i + ', -1)" title="뒤로"><img class="ico" src="icons/chevron-down.svg" alt=""></button>'
         + '<button class="delBtn" onclick="event.stopPropagation(); deleteThing(\'' + kind + '\', ' + i + ')" title="지우기">✕</button>'
         + '</li>';
     }
@@ -5345,11 +6113,11 @@
   var boardColors = ['#c8a27a', '#2f5d4f', '#ffffff', '#fdeff4', '#e3f0ff', '#fff6d5', '#3b3b45'];
   var patternColors = ['#ffffff', '#000000', '#e8d5b9', '#9ec5e8', '#f4a7b9', '#bdbdbd'];
   var patterns = [
-    { name: '백지', value: 'none' },
-    { name: '격자', value: 'grid' },
-    { name: '도트', value: 'dot' },
-    { name: '줄노트', value: 'line' },
-    { name: '사선', value: 'diagonal' }
+    { name: '백지', value: 'none', icon: 'square' },          // ★ 추가: 아이콘
+    { name: '격자', value: 'grid', icon: 'grid-1' },
+    { name: '도트', value: 'dot', icon: 'more-square' },
+    { name: '줄노트', value: 'line', icon: 'menu-1' },
+    { name: '사선', value: 'diagonal', icon: 'mask-1' }   // ★ 수정: 금지 표시 같아서 사선 무늬 아이콘으로
   ];
 
   function applyBoardBg() {
@@ -5359,7 +6127,7 @@
       canvasArea.style.backgroundSize = '';
       return;
     }
-    var c = board.patternColor;
+    var c = patternRgba();   // ★ 수정: 무늬 투명도 반영
     canvasArea.style.backgroundColor = board.color;
     if (board.pattern === 'grid') {
       canvasArea.style.backgroundImage = 'linear-gradient(' + c + ' 1px, transparent 1px), linear-gradient(90deg, ' + c + ' 1px, transparent 1px)';
@@ -5376,6 +6144,23 @@
     } else {
       canvasArea.style.backgroundImage = 'none';
     }
+  }
+
+  // ★ 추가: 무늬 선 색 + 무늬 투명도 → rgba(…) (예전 일기는 투명도가 없어서 100%)
+  function patternAlpha() {
+    if (board.patternAlpha === undefined) {
+      return 100;
+    }
+    return board.patternAlpha;
+  }
+
+  function patternRgba() {
+    var hex = board.patternColor;
+    var a = patternAlpha() / 100;
+    if (typeof hex === 'string' && hex.charAt(0) === '#' && hex.length === 7) {
+      return 'rgba(' + parseInt(hex.substring(1, 3), 16) + ', ' + parseInt(hex.substring(3, 5), 16) + ', ' + parseInt(hex.substring(5, 7), 16) + ', ' + a + ')';
+    }
+    return hex;
   }
 
   function setBoard(key, value) {
@@ -5403,7 +6188,7 @@
       if (patterns[p].value === board.pattern) {
         pcls = 'patternBtn active';
       }
-      html = html + '<button class="' + pcls + '" onclick="setBoard(\'pattern\', \'' + patterns[p].value + '\')">' + patterns[p].name + '</button>';
+      html = html + '<button class="' + pcls + '" onclick="setBoard(\'pattern\', \'' + patterns[p].value + '\')"><img class="ico" src="icons/' + patterns[p].icon + '.svg" alt=""> ' + patterns[p].name + '</button>';   // ★ 수정: 아이콘
     }
     document.getElementById('patternBtns').innerHTML = html;
 
@@ -5417,6 +6202,9 @@
     }
     document.getElementById('patternPalette').innerHTML = html;
     document.getElementById('patternColorInput').value = board.patternColor;
+    // ★ 추가: 무늬 투명도
+    document.getElementById('patternAlphaInput').value = patternAlpha();
+    document.getElementById('patternAlphaText').textContent = patternAlpha() + '%';
   }
 
   document.getElementById('boardColorInput').addEventListener('input', function () {
@@ -5424,6 +6212,10 @@
   });
   document.getElementById('patternColorInput').addEventListener('input', function () {
     setBoard('patternColor', document.getElementById('patternColorInput').value);
+  });
+  // ★ 추가: 무늬 투명도 슬라이더
+  document.getElementById('patternAlphaInput').addEventListener('input', function () {
+    setBoard('patternAlpha', Number(document.getElementById('patternAlphaInput').value));
   });
 
 
@@ -5635,6 +6427,26 @@
   }
 
   // ★ 수정: target 으로 일기용/달력용 구분 (안 넣으면 일기용)
+  // ★ 추가: 스티커 창 바깥을 누르면 닫기 (창 안, 스티커 버튼, 붙인 스티커를 누른 건 빼고)
+  document.addEventListener('mousedown', function (e) {
+    if (stickerPanel.style.display !== 'block') {
+      return;
+    }
+    if (e.target.closest('#stickerPanel, #stickerBtn, #monthStickerBtn, .sticker') !== null) {
+      return;
+    }
+    stickerPanel.style.display = 'none';
+  });
+  document.addEventListener('touchstart', function (e) {
+    if (stickerPanel.style.display !== 'block') {
+      return;
+    }
+    if (e.target.closest('#stickerPanel, #stickerBtn, #monthStickerBtn, .sticker') !== null) {
+      return;
+    }
+    stickerPanel.style.display = 'none';
+  });
+
   function toggleStickerPanel(target) {
     if (target === undefined) {
       target = 'sticker';
@@ -6391,13 +7203,52 @@
     return 20 + (level - 1) * 10;
   }
 
-  // ★ 추가: 레벨이 오를수록 조금씩 커지기 (최대 140px)
+  // ★ 수정: 레벨 따라 커지는 건 빼고, 펫 크기 버튼(작게 · 보통 · 크게)으로만 정해요
   function petSize(i) {
-    var size = 80 + (pets[i].level - 1) * 6;
-    if (size > 140) {
-      size = 140;
+    return Math.round(80 * petSizeScale());
+  }
+
+  // ★ 추가: 펫 크기 (모든 펫 같이) — 작게 75% · 보통 100% · 크게 130%
+  var petSizes = [
+    { name: '작게', value: 'small', scale: 0.75 },
+    { name: '보통', value: 'normal', scale: 1 },
+    { name: '크게', value: 'large', scale: 1.3 }
+  ];
+  var petSizeMode = localStorage.getItem('petSize');
+  if (petSizeMode === null) {
+    petSizeMode = 'normal';
+  }
+
+  function petSizeScale() {
+    for (var k = 0; k < petSizes.length; k++) {
+      if (petSizes[k].value === petSizeMode) {
+        return petSizes[k].scale;
+      }
     }
-    return size;
+    return 1;
+  }
+
+  function setPetSize(mode) {
+    petSizeMode = mode;
+    localStorage.setItem('petSize', mode);
+    for (var i = 0; i < petEls.length; i++) {
+      petEls[i].style.width = petSize(i) + 'px';
+      keepInScreen(i);
+      placePet(i);
+    }
+    renderPetSizeBtns();
+  }
+
+  function renderPetSizeBtns() {
+    var html = '';
+    for (var k = 0; k < petSizes.length; k++) {
+      var cls = 'patternBtn';
+      if (petSizes[k].value === petSizeMode) {
+        cls = 'patternBtn active';
+      }
+      html = html + '<button class="' + cls + '" onclick="setPetSize(\'' + petSizes[k].value + '\')">' + petSizes[k].name + '</button>';
+    }
+    document.getElementById('petSizeBtns').innerHTML = html;
   }
 
   // ★ 수정: 지금 상태에 맞는 이미지 (졸림 > 슬픔 > 배고픔 > 기본)
@@ -6826,6 +7677,7 @@
   document.getElementById('petBtn').addEventListener('click', function () {
     editingLines = -1;
     renderFoodControls();   // ★ 추가
+    renderPetSizeBtns();    // ★ 추가: 펫 크기 버튼
     resetPetForm();   // ★ 추가: 열 때는 항상 새 등록 상태로
     showPetCards();
     petModalBg.style.display = 'block';
@@ -6977,7 +7829,7 @@
     if (p.exp >= needExp(p.level)) {
       p.level = p.level + 1;
       p.exp = 0;
-      petEls[i].style.width = petSize(i) + 'px';   // 레벨 오르면 쑥 크기
+      petEls[i].style.width = petSize(i) + 'px';   // ★ 수정: 레벨이 올라도 크기는 그대로 (펫 크기 버튼으로만)
       say(i, '레벨 업! Lv.' + p.level + ' 🎉');
     } else if (foodName !== undefined) {
       // ★ 수정: 펫마다 먹는 대사 (Ay: 음, 맛있군! / Eve: 맛있게 먹을게요!)
@@ -7565,13 +8417,22 @@
     var areaRect = area.getBoundingClientRect();
     var petShots = takePetShots(areaRect);
 
+    // ★ 추가: 상자 투명도를 그림 저장 도구가 읽을 수 있는 색(rgba)으로 바꿔두기
+    var boxRgba = boxColorRgba();
+
     html2canvas(area, {
       scale: 2,
-      backgroundColor: currentPageBg(),   // ★ 수정: 지금 배경색 그대로
+      backgroundColor: null,   // ★ 수정: 빈 곳은 투명하게 찍고, 배경(색·사진)은 합칠 때 따로 그려요
       windowHeight: document.documentElement.scrollHeight + 2000,   // ★ 추가: 길게 늘어난 일기도 안 잘리게
       // ★ 추가: 찍기 직전에 "복사본" 화면만 살짝 고치기 (진짜 화면은 그대로)
       onclone: function (doc) {
         doc.body.classList.add('capturing');   // 버튼·입력칸 숨기기 (CSS의 .capturing 부분)
+
+        // ★ 추가: 상자 · 제목줄 배경을 투명도 그대로 (화면이랑 똑같이 비쳐 보이게)
+        var boxes = doc.querySelectorAll('.box, #header');
+        for (var bi = 0; bi < boxes.length; bi++) {
+          boxes[bi].style.background = boxRgba;
+        }
 
         // ★ 추가: 오른쪽 레이어 창이 숨겨지면 일기 칸이 그만큼 넓어져서 오른쪽에 흰 여백이 생겨요.
         //   → 일기 칸은 화면에서 보이던 너비 그대로 고정하고, 남는 자리는 잘라내기
@@ -7607,27 +8468,97 @@
         }
       }
     }).then(function (canvas) {
-      // ★ 수정: 펫이 찍는 범위 밖(창 맨 아래 등)에 있어도 나오게 그림을 넓혀서 합치기
-      var finalCanvas = composeWithPets(canvas, petShots, 2);   // ★ 수정: 찍는 너비가 화면이랑 달라질 수 있어서 배율(2배)을 그대로
-      var a = document.createElement('a');
-      // ★ 수정: 파일을 더블클릭(file://)으로 열면 그림 파일로 된 펫(Ay, Eve)은 브라우저가 보안상
-      //   그림에 넣는 걸 막아요. 그럴 땐 펫 없이라도 저장하고 알려주기 (GitHub Pages 주소에선 괜찮아요)
-      try {
-        a.href = finalCanvas.toDataURL('image/png');
-      } catch (e) {
-        a.href = canvas.toDataURL('image/png');
+      // ★ 수정: 바로 내려받지 않고 미리보기 창에서 보여주기 (배경 사진 넣을지 고르고 저장)
+      captured = { canvas: canvas, shots: petShots };
+      var hasPhoto = bgPhoto !== null && bgPhoto !== undefined;
+      document.getElementById('imgWithBgRow').style.display = hasPhoto ? '' : 'none';
+      document.getElementById('imgWithBg').checked = hasPhoto;
+      renderImgPreview();
+      document.getElementById('imgPreviewBg').style.display = 'block';
+    });
+  });
+
+  // ★ 추가: 이미지로 저장 미리보기
+  var captured = null;        // 찍어둔 그림 + 펫 모습 (배경만 바꿔서 다시 합칠 수 있게)
+  var previewUrl = '';
+  var previewWarned = false;
+
+  // 상자 색(--box-bg) + 투명도 → rgba(…) 글자
+  function boxColorRgba() {
+    var hex = getComputedStyle(document.body).getPropertyValue('--box-bg').trim();
+    var a = boxAlpha / 100;
+    if (hex.charAt(0) === '#' && hex.length === 7) {
+      var r = parseInt(hex.substring(1, 3), 16);
+      var g = parseInt(hex.substring(3, 5), 16);
+      var b = parseInt(hex.substring(5, 7), 16);
+      return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + a + ')';
+    }
+    // ★ 추가: 유리 테마처럼 이미 rgba(…) 면 투명도를 곱해서
+    var m = hex.match(/rgba?\(([^)]*)\)/);
+    if (m !== null) {
+      var parts = m[1].split(',');
+      var oldA = 1;
+      if (parts.length === 4) {
+        oldA = Number(parts[3]);
+      }
+      return 'rgba(' + parts[0].trim() + ', ' + parts[1].trim() + ', ' + parts[2].trim() + ', ' + (oldA * a) + ')';
+    }
+    return hex;   // 모르는 모양이면 그대로 (투명도 없이)
+  }
+
+  function renderImgPreview() {
+    if (captured === null) {
+      return;
+    }
+    var withPhoto = document.getElementById('imgWithBg').checked;
+    // 펫이 찍는 범위 밖(창 맨 아래 등)에 있어도 나오게 그림을 넓혀서 합치기
+    var finalCanvas = composeWithPets(captured.canvas, captured.shots, 2, withPhoto);
+    // 파일을 더블클릭(file://)으로 열면 그림 파일로 된 펫·사진은 브라우저가 보안상 그림에 넣는 걸 막아요.
+    // 그럴 땐 펫·사진 없이라도 저장하고 알려주기 (GitHub Pages 주소에선 괜찮아요)
+    try {
+      previewUrl = finalCanvas.toDataURL('image/png');
+    } catch (e) {
+      var plain = document.createElement('canvas');
+      plain.width = captured.canvas.width;
+      plain.height = captured.canvas.height;
+      var pctx = plain.getContext('2d');
+      pctx.fillStyle = currentPageBg();
+      pctx.fillRect(0, 0, plain.width, plain.height);
+      pctx.drawImage(captured.canvas, 0, 0);
+      previewUrl = plain.toDataURL('image/png');
+      if (previewWarned === false) {
+        previewWarned = true;
         alert('파일을 더블클릭해서 열면 그림 파일로 된 펫은 이미지에 같이 못 넣어요.\nGitHub Pages 주소로 열면 펫도 같이 저장돼요.');
       }
-      a.download = '노트_' + selectedDate + '.png';
-      a.click();
-    });
+    }
+    document.getElementById('imgPreview').src = previewUrl;
+  }
+
+  document.getElementById('imgWithBg').addEventListener('change', renderImgPreview);
+
+  function downloadPreview() {
+    var a = document.createElement('a');
+    a.href = previewUrl;
+    a.download = '노트_' + selectedDate + '.png';
+    a.click();
+  }
+
+  function closeImgPreview() {
+    document.getElementById('imgPreviewBg').style.display = 'none';
+    captured = null;
+  }
+
+  document.getElementById('imgPreviewBg').addEventListener('click', function (e) {
+    if (e.target.id === 'imgPreviewBg') {
+      closeImgPreview();   // 바깥 누르면 닫기
+    }
   });
 
 
   // =========================================================
   // ★ 추가: 백업 / 불러오기 (localStorage 전부를 .json 파일 하나로)
   // =========================================================
-  var backupKeys = ['siteTitle', 'ddays', 'todosByDate', 'diaryList', 'pets', 'bgColors', 'darkMode', 'myStickers', 'monthStickers', 'playlistUrl', 'playerVolume', 'theme', 'siteFont', 'boxAlpha', 'bgBlur', 'bgImage'];   // ★ 수정: 테마, 사이트 글꼴도 백업
+  var backupKeys = ['siteTitle', 'ddays', 'todosByDate', 'diaryList', 'pets', 'bgColors', 'darkMode', 'myStickers', 'monthStickers', 'playlistUrl', 'playerVolume', 'theme', 'siteFont', 'boxAlpha', 'bgBlur', 'bgImage', 'petSize'];   // ★ 수정: 테마, 사이트 글꼴, 펫 크기도 백업
 
   // ★ 수정: 모든 노트를 한 파일에 백업
   //   노트1은 예전 이름표 그대로('diaryList'), 다른 노트는 'n2:diaryList' 처럼 들어가요.
@@ -7902,12 +8833,12 @@
   function onPlayerStateChange(e) {
     if (e.data === YT.PlayerState.PLAYING) {
       musicPlaying = true;
-      playBtn.textContent = '⏸';
+      document.getElementById('playIcon').src = 'icons/pause.svg';   // ★ 수정: 아이콘
       document.getElementById('petLayer').classList.add('musicOn');   // 펫 춤추기
       updateMusicInfo();
     } else {
       musicPlaying = false;
-      playBtn.textContent = '▶';
+      document.getElementById('playIcon').src = 'icons/play.svg';   // ★ 수정: 아이콘
       document.getElementById('petLayer').classList.remove('musicOn');
       if (e.data === YT.PlayerState.CUED) {
         updateMusicInfo();
@@ -8047,11 +8978,13 @@
     var btn = document.getElementById('videoToggleBtn');
     if (wrap.classList.contains('folded')) {
       wrap.classList.remove('folded');
-      btn.textContent = '📺 영상 접기';
+      document.getElementById('videoIcon').src = 'icons/video-slash.svg';   // ★ 수정: 아이콘
+      document.getElementById('videoText').textContent = '영상 접기';
       localStorage.setItem('videoFolded', 'no');
     } else {
       wrap.classList.add('folded');
-      btn.textContent = '📺 영상 펴기';
+      document.getElementById('videoIcon').src = 'icons/video.svg';   // ★ 수정: 아이콘
+      document.getElementById('videoText').textContent = '영상 펴기';
       localStorage.setItem('videoFolded', 'yes');
     }
   }
@@ -8138,273 +9071,12 @@
 
 
   // =========================================================
-  // ★ 추가: 구글 시트 동기화 (할 일 + 디데이)
-  //   구글 시트에 붙인 Apps Script(Code.gs) 주소로 올리고 받아와요.
-  //   이름표(할 일 / 디데이)마다 "마지막으로 바뀐 시각"을 비교해서 더 최근 쪽을 따라가요.
+  // ★ 수정: 구글 시트 동기화는 없앴어요 (예전에 저장해둔 연결 주소·암호도 지우기)
   // =========================================================
-  var syncKeys = ['todosByDate', 'ddays'];
-  var syncNames = { todosByDate: '할 일', ddays: '디데이' };
-  var syncUrl = '';
-  var syncSecret = '';
-  var syncUpdated = {};   // 이 기기에서 이름표마다 마지막으로 바뀐(또는 맞춘) 시각
-  var syncTimer = null;
-  var syncBusy = false;
-
-  if (localStorage.getItem('syncUrl') !== null) {
-    syncUrl = localStorage.getItem('syncUrl');
-  }
-  if (localStorage.getItem('syncSecret') !== null) {
-    syncSecret = localStorage.getItem('syncSecret');
-  }
-  if (localStorage.getItem('syncUpdated') !== null) {
-    syncUpdated = JSON.parse(localStorage.getItem('syncUpdated'));
-  }
-
-  function syncReady() {
-    return syncUrl !== '' && syncSecret !== '';
-  }
-
-  function saveSyncUpdated() {
-    localStorage.setItem('syncUpdated', JSON.stringify(syncUpdated));
-  }
-
-  function timeText() {
-    var d = new Date();
-    return pad(d.getHours()) + ':' + pad(d.getMinutes());
-  }
-
-  // 위쪽 구름 표시 + 설정 창 글자
-  function setSyncStatus(icon, text) {
-    var badge = document.getElementById('syncBadge');
-    badge.textContent = icon;
-    badge.title = text;
-    document.getElementById('syncStatus').textContent = text;
-  }
-
-  // 할 일·디데이가 바뀔 때마다 불러요 (saveTodos, saveDdays 안에서)
-  function markChanged(key) {
-    if (syncUpdated === undefined) {
-      return;   // 페이지가 다 열리기 전이면 무시
-    }
-    syncUpdated[key] = Date.now();
-    saveSyncUpdated();
-    if (syncReady()) {
-      clearTimeout(syncTimer);
-      syncTimer = setTimeout(function () {
-        pushKeys(syncKeys);
-      }, 2000);   // 2초 동안 모았다가 한 번에 올리기
-      setSyncStatus('☁️…', '올릴 준비 중…');
-    }
-  }
-
-  // ----- 올리기 -----
-  function pushKeys(keys) {
-    if (syncReady() === false) {
-      return;
-    }
-    var data = {};
-    var count = 0;
-    for (var i = 0; i < keys.length; i++) {
-      var value = localStorage.getItem(keys[i]);
-      if (value === null) {
-        continue;
-      }
-      if (syncUpdated[keys[i]] === undefined) {
-        syncUpdated[keys[i]] = Date.now();
-      }
-      data[keys[i]] = { value: value, updated: syncUpdated[keys[i]] };
-      count = count + 1;
-    }
-    saveSyncUpdated();
-    if (count === 0) {
-      setSyncStatus('☁️✓', '동기화 완료 · ' + timeText());
-      return;
-    }
-
-    setSyncStatus('☁️…', '구글 시트에 올리는 중…');
-    // 글자로 보내야(text/plain) 구글이 막지 않고 받아줘요
-    fetch(syncUrl, { method: 'POST', body: JSON.stringify({ secret: syncSecret, data: data }) })
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (result) {
-        if (result.ok !== true) {
-          setSyncStatus('☁️⚠️', '올리기 실패: ' + result.error);
-          return;
-        }
-        setSyncStatus('☁️✓', '동기화 완료 · ' + timeText());
-      })
-      .catch(function () {
-        setSyncStatus('☁️⚠️', '구글 시트에 연결할 수 없어요. 인터넷이랑 주소를 확인해주세요.');
-      });
-  }
-
-  // ----- 받아와서 맞추기 -----
-  function pullAndMerge() {
-    if (syncReady() === false || syncBusy === true) {
-      return;
-    }
-    syncBusy = true;
-    setSyncStatus('☁️…', '구글 시트에서 받아오는 중…');
-
-    fetch(syncUrl + '?secret=' + encodeURIComponent(syncSecret))
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (result) {
-        syncBusy = false;
-        if (result.ok !== true) {
-          setSyncStatus('☁️⚠️', '받아오기 실패: ' + result.error);
-          return;
-        }
-        var toPush = [];
-        var changed = false;
-        // ★ 추가: 이 주소랑 처음 맞추는 건지 (연결 전에 이 기기에서 바꾼 시각은 믿으면 안 돼요.
-        //   안 그러면 새 기기에서 할 일 하나만 추가해둬도 "더 최근"이라서 시트 전체를 덮어써요)
-        var firstLink = localStorage.getItem('syncLinked') !== syncUrl;
-
-        for (var i = 0; i < syncKeys.length; i++) {
-          var key = syncKeys[i];
-          var remote = result.data[key];
-          var local = localStorage.getItem(key);
-          var localTime = syncUpdated[key];
-
-          // 시트에 없음 → 이 기기 내용 올리기
-          if (remote === undefined || remote.value === '') {
-            if (local !== null) {
-              toPush[toPush.length] = key;
-            }
-            continue;
-          }
-          // 이 기기에 없음 → 시트 내용 받기
-          if (local === null) {
-            applyRemote(key, remote);
-            changed = true;
-            continue;
-          }
-          // 내용이 똑같음 → 시각만 맞추기
-          if (local === remote.value) {
-            syncUpdated[key] = remote.updated;
-            continue;
-          }
-          // 이 기기에서 처음 연결했는데 양쪽 내용이 다름 → 물어보기 (★ 수정: firstLink 추가)
-          if (localTime === undefined || firstLink === true) {
-            var useRemote = confirm('[' + syncNames[key] + '] 구글 시트에 다른 내용이 저장돼 있어요.\n\n'
-              + '확인: 시트 내용으로 바꾸기\n취소: 이 기기 내용을 시트에 올리기');
-            if (useRemote === true) {
-              applyRemote(key, remote);
-              changed = true;
-            } else {
-              toPush[toPush.length] = key;
-            }
-            continue;
-          }
-          // 더 최근에 바뀐 쪽 따라가기
-          if (remote.updated > localTime) {
-            applyRemote(key, remote);
-            changed = true;
-          } else if (localTime > remote.updated) {
-            toPush[toPush.length] = key;
-          }
-        }
-        saveSyncUpdated();
-        localStorage.setItem('syncLinked', syncUrl);   // ★ 추가: 이제 이 주소랑 맞춰진 상태
-
-        if (changed === true) {
-          showTodos();
-          showDdays();
-          showCalendar();
-          if (monthModalBg.style.display === 'block') {
-            showMonthView();
-          }
-        }
-        if (toPush.length > 0) {
-          pushKeys(toPush);
-        } else {
-          setSyncStatus('☁️✓', '동기화 완료 · ' + timeText());
-        }
-      })
-      .catch(function () {
-        syncBusy = false;
-        setSyncStatus('☁️⚠️', '구글 시트에 연결할 수 없어요. 인터넷이랑 주소를 확인해주세요.');
-      });
-  }
-
-  // 시트 내용으로 바꾸기 (saveTodos를 안 거쳐서 "바뀜" 표시가 안 생겨요)
-  function applyRemote(key, remote) {
-    var parsed;
-    try {
-      parsed = JSON.parse(remote.value);
-    } catch (e) {
-      return;   // 시트 내용이 망가졌으면 건드리지 않기
-    }
-    localStorage.setItem(key, remote.value);
-    syncUpdated[key] = remote.updated;
-    if (key === 'todosByDate') {
-      todosByDate = parsed;
-    } else if (key === 'ddays') {
-      ddays = parsed;
-    }
-  }
-
-  // ----- 설정 창 버튼 -----
-  function connectSync() {
-    var url = document.getElementById('syncUrlInput').value.trim();
-    var secret = document.getElementById('syncSecretInput').value.trim();
-    if (url === '' || secret === '') {
-      alert('웹 앱 주소랑 암호를 둘 다 넣어주세요!');
-      return;
-    }
-    if (url.indexOf('https://script.google.com/') !== 0 || url.substring(url.length - 5) !== '/exec') {
-      alert('주소가 이상해요.\nhttps://script.google.com/ 으로 시작하고 /exec 로 끝나는 "웹 앱" 주소를 넣어주세요.');
-      return;
-    }
-    syncUrl = url;
-    syncSecret = secret;
-    localStorage.setItem('syncUrl', url);
-    localStorage.setItem('syncSecret', secret);
-    pullAndMerge();
-  }
-
-  function disconnectSync() {
-    if (confirm('구글 시트 연결을 끊을까요?\n(이 기기의 할 일·디데이는 그대로 남아요)') === false) {
-      return;
-    }
-    syncUrl = '';
-    syncSecret = '';
-    localStorage.removeItem('syncUrl');
-    localStorage.removeItem('syncSecret');
-    localStorage.removeItem('syncLinked');   // ★ 추가: 다시 연결하면 처음처럼 물어보기
-    document.getElementById('syncUrlInput').value = '';
-    document.getElementById('syncSecretInput').value = '';
-    setSyncStatus('', '연결 안 됨');
-  }
-
-  // 설정 창 열 때 지금 값 채우기
-  document.getElementById('settingBtn').addEventListener('click', function () {
-    document.getElementById('syncUrlInput').value = syncUrl;
-    document.getElementById('syncSecretInput').value = syncSecret;
-  });
-
-  // 다른 탭·앱 갔다가 돌아오면 받아오기 (다른 기기에서 바꾼 것 반영)
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') {
-      pullAndMerge();
-    }
-  });
-  // 켜져 있는 동안 2분마다 받아오기
-  setInterval(function () {
-    if (document.visibilityState === 'visible') {
-      pullAndMerge();
-    }
-  }, 120000);
-
-  // 처음 열었을 때
-  if (syncReady()) {
-    pullAndMerge();
-  } else {
-    setSyncStatus('', '연결 안 됨');
-  }
+  localStorage.removeItem('syncUrl');
+  localStorage.removeItem('syncSecret');
+  localStorage.removeItem('syncLinked');
+  localStorage.removeItem('syncUpdated');
 
 
   // =========================================================
@@ -8552,24 +9224,112 @@
 
 
   // =========================================================
+  // ★ 추가: 위쪽 아이콘 — 누르면 톡 튀는 효과 + 작은 창(노트 · 테마 · 배경) 열고 닫기
+  // =========================================================
+  var openPanelId = null;
+
+  // 아이콘 누르면 통통 튀기 (애니메이션을 다시 시작하려고 class 를 뺐다가 다시 넣어요)
+  var navBtns = document.querySelectorAll('.navIcon');
+  for (var nb = 0; nb < navBtns.length; nb++) {
+    navBtns[nb].addEventListener('click', function () {
+      var btn = this;
+      btn.classList.remove('tap');
+      void btn.offsetWidth;   // 브라우저가 "빠졌다"는 걸 알아채게 한 번 읽기
+      btn.classList.add('tap');
+    });
+  }
+
+  // 창 열기 전에 지금 값으로 채우기
+  function preparePanel(id) {
+    if (id === 'notePanel') {
+      renderNoteSelect();
+    } else if (id === 'themePanel') {
+      renderThemeBtns();
+      siteFontSelect.value = siteFont;
+      applyBoxAlpha();
+    } else if (id === 'bgPanel') {
+      syncColorInputs('light');
+      syncColorInputs('dark');
+      applyBgPhoto();
+    }
+  }
+
+  function togglePanel(id, btn) {
+    if (openPanelId === id) {
+      closePanels();
+      return;
+    }
+    closePanels();
+    preparePanel(id);
+    var panel = document.getElementById(id);
+    panel.style.display = 'block';
+    // 누른 아이콘 바로 아래, 화면 밖으로 안 나가게
+    var r = btn.getBoundingClientRect();
+    var w = panel.offsetWidth;
+    var left = r.left + r.width / 2 - w / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+    panel.style.left = left + 'px';
+    panel.style.top = (r.bottom + 12) + 'px';
+    panel.classList.remove('show');
+    void panel.offsetWidth;
+    panel.classList.add('show');
+    btn.classList.add('on');
+    openPanelId = id;
+  }
+
+  function closePanels() {
+    var panels = document.querySelectorAll('.navPanel');
+    for (var i = 0; i < panels.length; i++) {
+      panels[i].style.display = 'none';
+      panels[i].classList.remove('show');
+    }
+    var ons = document.querySelectorAll('.navIcon.on');
+    for (var j = 0; j < ons.length; j++) {
+      ons[j].classList.remove('on');
+    }
+    openPanelId = null;
+  }
+
+  // 창 바깥을 누르면 닫기 (창 안, 아이콘을 누른 건 빼고)
+  document.addEventListener('mousedown', function (e) {
+    if (openPanelId === null) {
+      return;
+    }
+    if (e.target.closest('.navPanel') !== null || e.target.closest('.navIcon') !== null) {
+      return;
+    }
+    closePanels();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closePanels();
+    }
+  });
+  window.addEventListener('resize', closePanels);
+
+
+  // =========================================================
   // ★ 추가: 노트 고르기 / 만들기 / 이름 바꾸기 / 지우기
   // =========================================================
-  var noteSelect = document.getElementById('noteSelect');
   var noteNameInput = document.getElementById('noteNameInput');
 
   function saveNoteList() {
     localStorage.setItem('noteList', JSON.stringify(noteList));
   }
 
+  // ★ 수정: 노트 창(📚 아이콘)에 노트 목록을 버튼으로
   function renderNoteSelect() {
     var html = '';
     for (var i = 0; i < noteList.length; i++) {
-      html = html + '<option value="' + noteList[i].id + '">📒 ' + safeText(noteList[i].name) + '</option>';
+      var cls = 'noteItem';
+      if (noteList[i].id === currentNote) {
+        cls = 'noteItem active';
+      }
+      html = html + '<button class="' + cls + '" onclick="switchNote(\'' + noteList[i].id + '\')">📒 ' + safeText(noteList[i].name) + '</button>';
     }
-    html = html + '<option value="__new">＋ 새 노트</option>';
-    noteSelect.innerHTML = html;
-    noteSelect.value = currentNote;
+    document.getElementById('noteListBox').innerHTML = html;
     noteNameInput.value = noteList[noteIndex(currentNote)].name;
+    document.getElementById('noteNavBtn').setAttribute('data-tip', '노트 · ' + noteList[noteIndex(currentNote)].name);
     // 노트1은 예전 데이터가 들어 있는 기본 노트라 못 지워요
     document.getElementById('deleteNoteBtn').disabled = currentNote === 'n1';
   }
@@ -8599,7 +9359,6 @@
   function createNote() {
     var name = prompt('새 노트 이름을 지어주세요 (예: 행복한 날 일기장)', '노트' + (noteList.length + 1));
     if (name === null) {
-      noteSelect.value = currentNote;   // 취소하면 원래 노트 그대로
       return;
     }
     name = name.trim();
@@ -8656,13 +9415,6 @@
     });
   }
 
-  noteSelect.addEventListener('change', function () {
-    if (noteSelect.value === '__new') {
-      createNote();
-    } else {
-      switchNote(noteSelect.value);
-    }
-  });
 
   noteNameInput.addEventListener('input', function () {
     var name = noteNameInput.value.trim();
