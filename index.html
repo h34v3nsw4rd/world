@@ -2330,8 +2330,9 @@
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  .capturing .box::before {
-    display: none !important;
+  .capturing .box::before,
+  body.noShine .box::before {
+    display: none !important;   /* ★ 수정: 저장 도구는 반짝임을 진짜 화면에서 읽어가서, 저장하는 순간엔 진짜 화면에서도 잠깐 끄기 */
   }
 
   /* ★ 추가: 휴대폰 화면 — 이름 줄 아래에 아이콘 줄 (위의 PC 규칙보다 뒤에 있어야 이겨요) */
@@ -8433,6 +8434,8 @@
     // ★ 추가: 상자 투명도를 그림 저장 도구가 읽을 수 있는 색(rgba)으로 바꿔두기
     var boxRgba = boxColorRgba();
 
+    document.body.classList.add('noShine');   // ★ 추가: 저장하는 동안만 물방울 반짝임 끄기
+
     html2canvas(area, {
       scale: 2,
       backgroundColor: null,   // ★ 수정: 빈 곳은 투명하게 찍고, 배경(색·사진)은 합칠 때 따로 그려요
@@ -8483,6 +8486,7 @@
         }
       }
     }).then(function (canvas) {
+      document.body.classList.remove('noShine');   // ★ 추가: 반짝임 다시 켜기
       // ★ 수정: 바로 내려받지 않고 미리보기 창에서 보여주기 (배경 사진 넣을지 고르고 저장)
       captured = { canvas: canvas, shots: petShots };
       var hasPhoto = bgPhoto !== null && bgPhoto !== undefined;
@@ -8491,6 +8495,7 @@
       renderImgPreview();
       document.getElementById('imgPreviewBg').style.display = 'block';
     }).catch(function (e) {
+      document.body.classList.remove('noShine');
       // ★ 추가: 실패하면 조용히 멈추지 말고 알려주기
       alert('이미지로 저장하지 못했어요 😢\n새로고침한 다음 다시 해보고, 계속 안 되면 이 글자를 알려주세요:\n' + e);
     });
