@@ -2321,6 +2321,19 @@
     background: linear-gradient(180deg, rgba(90, 110, 160, 0.6), rgba(40, 50, 80, 0.5));
   }
 
+  /* ★ 추가: 이미지로 저장할 때만 — 그림 저장 도구가 제대로 못 그리는 효과 빼기
+     (안쪽 그림자는 둥근 모서리를 무시하고 네모로, 물방울 반짝임은 회색 얼룩으로 찍혀요) */
+  .capturing .box,
+  .capturing #header,
+  .capturing #editorWrap {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .capturing .box::before {
+    display: none !important;
+  }
+
   /* ★ 추가: 휴대폰 화면 — 이름 줄 아래에 아이콘 줄 (위의 PC 규칙보다 뒤에 있어야 이겨요) */
   @media (max-width: 820px) {
     #header {
